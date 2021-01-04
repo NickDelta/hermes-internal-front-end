@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="HermesInternalFrontEndApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="internal-front-end" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.hua.hermes.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.hua.hermes.HermesInternalFrontEndApplication" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="KEYCLOAK_ADMIN_CLIENT_ID" value="keycloak-admin" />
+      <env name="KEYCLOAK_ADMIN_SECRET" value="71ff7d46-ad8f-4b52-8107-00415c07f0d4" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
