@@ -15,12 +15,13 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.server.InitialPageSettings;
+import com.vaadin.flow.server.PageConfigurator;
 import de.codecamp.vaadin.security.spring.access.VaadinSecurity;
 import org.hua.hermes.frontend.component.NaviMenu;
 import org.hua.hermes.frontend.util.UIUtils;
 import org.hua.hermes.frontend.util.style.FontWeight;
 import org.hua.hermes.frontend.util.style.css.TextAlign;
-
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -28,6 +29,7 @@ import org.hua.hermes.frontend.util.style.css.TextAlign;
 @JsModule("./styles/shared-styles.js")
 @CssImport(value = "./styles/components/floating-action-button.css", themeFor = "vaadin-button")
 @CssImport(value = "./styles/components/grid.css", themeFor = "vaadin-grid")
+@CssImport(value = "./styles/views/main/main-view.css", include = "lumo-badge")
 @CssImport("./styles/lumo/border-radius.css")
 @CssImport("./styles/lumo/icon-size.css")
 @CssImport("./styles/lumo/margin.css")
@@ -35,9 +37,8 @@ import org.hua.hermes.frontend.util.style.css.TextAlign;
 @CssImport("./styles/lumo/shadow.css")
 @CssImport("./styles/lumo/spacing.css")
 @CssImport("./styles/lumo/typography.css")
-@CssImport("./styles/views/main/main-view.css") //MainView CSS
-@CssImport(value = "./styles/styles.css", include = "lumo-badge") //Include CSS for lumo badges
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout
+{
 
     private H1 viewTitle;
 
@@ -96,7 +97,15 @@ public class MainLayout extends AppLayout {
     }
 
     private String getCurrentPageTitle() {
-        return getContent().getClass().getAnnotation(PageTitle.class).value();
+        String title = "";
+        try{
+            return getContent().getClass().getAnnotation(PageTitle.class).value();
+        } catch (NullPointerException ex) {
+            try {
+                return (String)getContent().getClass().getMethod("getPageTitle").invoke(getContent());
+            } catch (Exception ignored){}
+        }
+        return title;
     }
 
     private Component createProfileImage(){
@@ -132,4 +141,5 @@ public class MainLayout extends AppLayout {
 
         return image;
     }
+
 }

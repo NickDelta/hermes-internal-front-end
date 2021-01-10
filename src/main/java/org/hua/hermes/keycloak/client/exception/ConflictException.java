@@ -1,4 +1,4 @@
-package org.hua.hermes.frontend.data.presenter.exception;
+package org.hua.hermes.keycloak.client.exception;
 
 import lombok.Getter;
 

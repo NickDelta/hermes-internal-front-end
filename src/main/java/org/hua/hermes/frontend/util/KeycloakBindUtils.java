@@ -6,7 +6,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.util.HashMap;
 import java.util.List;
 
-public class KeycloakBindUtil
+public class KeycloakBindUtils
 {
     public static void setAttribute(UserRepresentation user, String field, String value)
     {
@@ -22,6 +22,9 @@ public class KeycloakBindUtil
     }
 
     public static void setCredentials(UserRepresentation user, String password, boolean temporary){
+
+        if(password == null || password.isEmpty()) return;
+
         var credential = new CredentialRepresentation();
         credential.setType("password");
         credential.setTemporary(temporary);

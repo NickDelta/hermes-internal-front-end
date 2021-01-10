@@ -12,6 +12,7 @@
     <envs>
       <env name="KEYCLOAK_ADMIN_CLIENT_ID" value="keycloak-admin" />
       <env name="KEYCLOAK_ADMIN_SECRET" value="71ff7d46-ad8f-4b52-8107-00415c07f0d4" />
+      <env name="keycloak.auth-server-url" value="http://localhost:8001/auth" />
     </envs>
     <method v="2">
       <option name="Make" enabled="true" />

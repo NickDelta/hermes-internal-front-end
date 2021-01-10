@@ -4,6 +4,8 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /**
  * Interface for views showing notifications to users
@@ -18,7 +20,9 @@ public interface HasNotifications extends HasElement {
 
 		Text text = new Text(message);
 		Button okButton = new Button("OK", event -> dialog.close());
-		dialog.add(text,okButton);
+		VerticalLayout layout = new VerticalLayout(text,okButton);
+		layout.setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
+		dialog.add(layout);
 
 		dialog.open();
 	}

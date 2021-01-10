@@ -10,7 +10,6 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 
-
 @Route(RedirectView.ROUTE_PATH)
 public class RedirectView
        extends Composite<VerticalLayout>
@@ -27,21 +26,15 @@ public class RedirectView
     String targetUrl = (String) ComponentUtil.getData(event.getUI(), DATA_TARGET);
 
     getContent().removeAll();
-    Div div = new Div();
-    getContent().add(div);
 
-    if (targetUrl != null)
-    {
+    if (targetUrl != null) {
       ComponentUtil.setData(event.getUI(), DATA_TARGET, null);
-
-      div.add("Redirecting to ");
-      div.add(new Anchor(targetUrl, targetUrl));
-
       event.getUI().getPage().setLocation(targetUrl);
     }
-    else
-    {
-      div.add("Redirect view entered without target.");
+    else {
+      //This view is intended only for internal use.
+      //External user should not have knowledge that this exists.
+      event.rerouteTo("404");
     }
   }
 

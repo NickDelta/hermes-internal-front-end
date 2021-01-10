@@ -1,5 +1,7 @@
 package org.hua.hermes.config;
 
+import org.hua.hermes.keycloak.client.HermesKeycloak;
+import org.hua.hermes.keycloak.client.HermesKeycloakBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -24,8 +26,8 @@ public class KeycloakClientConfig
     private String clientSecret;
 
     @Bean
-    public Keycloak getKeycloakClient(){
-        return KeycloakBuilder.builder()
+    public HermesKeycloak getKeycloakClient(){
+        return HermesKeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .realm(realm)

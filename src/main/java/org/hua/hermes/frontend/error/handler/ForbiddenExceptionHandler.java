@@ -1,4 +1,4 @@
-package org.hua.hermes.frontend.view;
+package org.hua.hermes.frontend.error.handler;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 @Tag(Tag.DIV)
-public class AccessDeniedExceptionHandler
+public class ForbiddenExceptionHandler
   extends Component
   implements HasErrorParameter<RouteAccessDeniedException>
 {
@@ -19,7 +19,7 @@ public class AccessDeniedExceptionHandler
   @Override
   public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<RouteAccessDeniedException> parameter)
   {
-    getElement().setText("Ooops! You are not allowed to see this resource.");
+    event.rerouteTo("403");
     return HttpServletResponse.SC_FORBIDDEN;
   }
 
