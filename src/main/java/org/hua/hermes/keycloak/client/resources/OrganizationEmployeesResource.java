@@ -2,7 +2,6 @@ package org.hua.hermes.keycloak.client.resources;
 
 import org.keycloak.admin.client.resource.GroupResource;
 import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.UserRepresentation;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -12,7 +11,7 @@ public interface OrganizationEmployeesResource
 {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    List<UserRepresentation> list(@QueryParam("offset") Integer offset,
+    List<UserResource> list(@QueryParam("offset") Integer offset,
                                   @QueryParam("limit") Integer limit);
 
     @GET
