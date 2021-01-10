@@ -22,6 +22,7 @@ import org.hua.hermes.frontend.component.NaviMenu;
 import org.hua.hermes.frontend.util.UIUtils;
 import org.hua.hermes.frontend.util.style.FontWeight;
 import org.hua.hermes.frontend.util.style.css.TextAlign;
+import org.hua.hermes.frontend.view.administrators.organizations.OrganizationsView;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -86,6 +87,10 @@ public class MainLayout extends AppLayout
     {
         NaviMenu menu = new NaviMenu();
         menu.addNaviItem(VaadinIcon.HOME,"Home",HomeView.class);
+
+        if(VaadinSecurity.check().hasRole("ROLE_ORGS_ADMIN")){
+            menu.addNaviItem(VaadinIcon.BUILDING,"Organizations", OrganizationsView.class);
+        }
 
         return menu;
     }
