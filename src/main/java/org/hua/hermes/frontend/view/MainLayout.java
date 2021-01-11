@@ -89,6 +89,10 @@ public class MainLayout extends AppLayout
             menu.addNaviItem(VaadinIcon.BUILDING,"Organizations", OrganizationsView.class);
         }
 
+        if(VaadinSecurity.check().hasRole("ROLE_ORG_SUPERVISOR")) {
+            menu.addNaviItem(VaadinIcon.USERS, "Employees", OrganizationManageEmployeesView.class);
+        }
+
         return menu;
     }
 

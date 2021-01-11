@@ -8,4 +8,6 @@ public class RouteConstants
     public static final String TITLE_ORGS_ADMIN = "Organizations Management";
 
     public static final String SECURITY_ORGS_ADMIN = "hasRole('ROLE_ORGS_ADMIN')";
+
+    public static final String PAGE_ORG_EMPLOYEES = "organizations/employees";
 }

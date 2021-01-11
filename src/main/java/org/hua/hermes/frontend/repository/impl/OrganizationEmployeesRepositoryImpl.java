@@ -7,9 +7,12 @@ import org.hua.hermes.keycloak.client.exception.ConflictException;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class OrganizationEmployeesRepositoryImpl implements OrganizationEmployeesRepository {
 
     private final HermesKeycloak client;
