@@ -59,7 +59,7 @@ public class OrganizationEmployeesRepositoryImpl implements OrganizationEmployee
                 .create(userRepresentation);
 
         if(response.getStatus() == 409)
-            throw new ConflictException("Please ensure that there isn't any employee with id " + userRepresentation.getId());
+            throw new ConflictException("Please ensure that there isn't any user with the same username or password.");
         if(response.getStatus() != 201)
             throw new InternalServerErrorException("Save failed");
 
