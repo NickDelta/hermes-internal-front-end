@@ -1,6 +1,6 @@
-package org.hua.hermes.frontend.util;
+package org.hua.hermes.frontend.constant;
 
-public class FormattingConstants
+public class DateTimeConstants
 {
     public static final String DATE_FORMAT = "dd/MM/yyyy";
     public static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";

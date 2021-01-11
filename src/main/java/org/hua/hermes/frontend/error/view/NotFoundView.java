@@ -1,9 +1,11 @@
 package org.hua.hermes.frontend.error.view;
 
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hua.hermes.frontend.view.HomeView;
 
 @Route("404")
+@PageTitle("404 - Page Not Found")
 public class NotFoundView extends ErrorView
 {
     public NotFoundView()

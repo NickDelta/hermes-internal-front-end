@@ -1,7 +1,8 @@
-package org.hua.hermes.frontend.view.administrators.supervisors;
+package org.hua.hermes.frontend.view.presenter;
 
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
 import org.hua.hermes.frontend.repository.OrganizationSupervisorsRepository;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
 import org.hua.hermes.frontend.view.HasNotifications;
@@ -77,29 +78,30 @@ public class OrganizationSupervisorsCrudPresenter
         }
     }
 
-    protected <V> V execute(Callable<V> callable) throws Exception
+    protected <V> V execute(Callable<V> callable)
     {
         if(view == null) throw new IllegalStateException("View has not been set");
         try{
             return callable.call();
-        } catch (BadRequestException ex){
-            consumeError(ex,"Data entered cannot be processed");
-            throw ex;
         } catch (NotFoundException ex){
-            consumeError(ex,"Requested entity not found");
-            throw ex;
+            //If resource is not found then go to the beautiful 404 page
+            log.error(ex);
+            throw new com.vaadin.flow.router.NotFoundException();
         }
         catch (ConflictException ex){
-            consumeError(ex,ex.getMessage());
+            //In case of conflict inform the user about it.
+            //Unfortunately, keycloak's API doesn't return any info on what caused the conflict.
+            log.error(ex);
+            consumeError("A conflict has occurred. " + ex.getMessage());
             throw ex;
         } catch (Exception ex){
-            consumeError(ex,"Internal error occurred");
-            throw ex;
+            //We treat any other exception as a 500 because that is not intended behavior.
+            log.error(ex);
+            throw new InternalServerErrorException(ex);
         }
     }
 
-    private void consumeError(Exception ex, String message) {
-        log.error(message, ex);
+    private void consumeError(String message) {
         view.showNotification(message);
     }
 }

@@ -15,14 +15,11 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.server.InitialPageSettings;
-import com.vaadin.flow.server.PageConfigurator;
 import de.codecamp.vaadin.security.spring.access.VaadinSecurity;
 import org.hua.hermes.frontend.component.NaviMenu;
 import org.hua.hermes.frontend.util.UIUtils;
 import org.hua.hermes.frontend.util.style.FontWeight;
 import org.hua.hermes.frontend.util.style.css.TextAlign;
-import org.hua.hermes.frontend.view.administrators.organizations.OrganizationsView;
 
 /**
  * The main view is a top-level placeholder for other views.
