@@ -61,7 +61,7 @@ public class OrganizationEmployeesRepositoryImpl implements OrganizationEmployee
         if(response.getStatus() == 409)
             throw new ConflictException("Please ensure that there isn't any user with the same username or password.");
         if(response.getStatus() != 201)
-            throw new InternalServerErrorException("Save failed");
+            throw new InternalServerErrorException("Save failed.");
 
         return true;
     }
