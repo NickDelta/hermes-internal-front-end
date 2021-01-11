@@ -1,9 +1,11 @@
 package org.hua.hermes.frontend.error.view;
 
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hua.hermes.frontend.view.HomeView;
 
 @Route("500")
+@PageTitle("500 - Internal Server Error")
 public class InternalServerErrorView extends ErrorView
 {
     public InternalServerErrorView()

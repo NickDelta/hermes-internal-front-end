@@ -1,5 +1,6 @@
 package org.hua.hermes.frontend.repository.impl;
 
+import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
 import org.hua.hermes.frontend.repository.OrganizationSupervisorsRepository;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
 import org.hua.hermes.keycloak.client.HermesKeycloak;
@@ -59,6 +60,11 @@ public class OrganizationSupervisorsRepositoryImpl implements OrganizationSuperv
 
         if(response.getStatus() == 409)
             throw new ConflictException("Please ensure that there isn't any user with the same username or password.");
+
+        //Just to be sure
+        if(response.getStatus() != 201)
+            throw new InternalServerErrorException("Save failed");
+
         return true;
     }
 
