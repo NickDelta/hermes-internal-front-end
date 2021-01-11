@@ -1,11 +1,11 @@
 package org.hua.hermes.frontend.repository.impl;
 
+import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
 import org.hua.hermes.frontend.repository.OrganizationEmployeesRepository;
 import org.hua.hermes.keycloak.client.HermesKeycloak;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 import java.util.Optional;
@@ -22,50 +22,67 @@ public class OrganizationEmployeesRepositoryImpl implements OrganizationEmployee
     }
 
     @Override
-    public Optional<UserResource> findById(GroupRepresentation organization, String empName) {
+    public Optional<UserRepresentation> findById(GroupRepresentation organization, String empId) {
         return Optional.ofNullable(client
         .organizations()
         .organization(organization.getName())
         .employees()
-        .employee(empName));
+        .employee(empId)
+        .toRepresentation());
     }
 
     @Override
-    public List<UserResource> findAll(GroupRepresentation organization, int offset, int limit) {
-        return client.organizations().organization(organization.getName()).employees().list(offset,limit);
+    public List<UserRepresentation> findAll(GroupRepresentation organization, int offset, int limit) {
+        return client
+                .organizations()
+                .organization(organization.getName())
+                .employees()
+                .list(offset,limit);
     }
 
     @Override
     public Integer count(GroupRepresentation organization) {
-        return client.organizations().organization(organization.getName()).employees().count();
+        return client
+                .organizations()
+                .organization(organization.getName())
+                .employees()
+                .count();
     }
 
     @Override
-    public boolean save(ClientRepresentation clientRepresentation) {
+    public boolean save(GroupRepresentation organization, UserRepresentation userRepresentation) {
+        userRepresentation.setGroups(List.of("ORGANIZATIONS/" + organization.getName() + "/EMPLOYEES"));
+
         var response = client
                 .realm(realm)
-                .clients()
-                .create(clientRepresentation);
+                .users()
+                .create(userRepresentation);
+
         if(response.getStatus() == 409)
-            throw new ConflictException("Please ensure that there isn't any employee with the name " + clientRepresentation.getName());
+            throw new ConflictException("Please ensure that there isn't any employee with id " + userRepresentation.getId());
+        if(response.getStatus() != 201)
+            throw new InternalServerErrorException("Save failed");
+
         return true;
     }
 
     @Override
-    public boolean update(ClientRepresentation clientRepresentation) {
-        client.realm(realm)
-                .clients()
-                .get(clientRepresentation.getId())
-                .update(clientRepresentation);
+    public boolean update(GroupRepresentation organization, UserRepresentation userRepresentation) {
+        client.organizations()
+                .organization(organization.getName())
+                .employees()
+                .employee(userRepresentation.getId())
+                .update(userRepresentation);
         return true;
     }
 
     @Override
-    public boolean delete(ClientRepresentation clientRepresentation) {
-        client.realm(realm)
-                .clients()
-                .findByClientId(clientRepresentation.getId())
-                .remove(clientRepresentation);
+    public boolean delete(GroupRepresentation organization, UserRepresentation userRepresentation) {
+        client.organizations()
+                .organization(organization.getName())
+                .employees()
+                .employee(userRepresentation.getId())
+                .remove();
         return true;
     }
 }
