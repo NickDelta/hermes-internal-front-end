@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface OrganizationApplicationRepository
 {
-    Optional<Application> findAll(int offset,int limit);
-    List<Application> findApplicationById(String applicationId);
+    List<Application> findAll(int offset,int limit);
+    Optional<Application> findById(String id);
     Integer count();
-    boolean update(String applicationId,String state);
+    boolean update(Application application);
 }
