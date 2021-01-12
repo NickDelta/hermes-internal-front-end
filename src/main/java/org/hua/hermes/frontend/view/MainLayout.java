@@ -90,7 +90,7 @@ public class MainLayout extends AppLayout
         }
 
         if(VaadinSecurity.check().hasRole("ROLE_ORG_SUPERVISOR")) {
-            menu.addNaviItem(VaadinIcon.USERS, "Employees", OrganizationManageEmployeesView.class);
+            menu.addNaviItem(VaadinIcon.USERS, "Employees", OrganizationEmployeesView.class);
         }
 
         return menu;

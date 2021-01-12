@@ -15,13 +15,14 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @Log4j2
-public class OrganizationEmployeeCrudPresenter {
+public class OrganizationEmployeesCrudPresenter
+{
     protected final OrganizationEmployeesRepository repository;
 
     @Setter
     protected HasNotifications view;
 
-    public OrganizationEmployeeCrudPresenter(OrganizationEmployeesRepository repository) {
+    public OrganizationEmployeesCrudPresenter(OrganizationEmployeesRepository repository) {
         this.repository = repository;
     }
 
