@@ -15,8 +15,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.server.InitialPageSettings;
-import com.vaadin.flow.server.PageConfigurator;
 import de.codecamp.vaadin.security.spring.access.VaadinSecurity;
 import org.hua.hermes.frontend.component.NaviMenu;
 import org.hua.hermes.frontend.util.UIUtils;
@@ -86,6 +84,10 @@ public class MainLayout extends AppLayout
     {
         NaviMenu menu = new NaviMenu();
         menu.addNaviItem(VaadinIcon.HOME,"Home",HomeView.class);
+
+        if(VaadinSecurity.check().hasRole("ROLE_ORGS_ADMIN")){
+            menu.addNaviItem(VaadinIcon.BUILDING,"Organizations", OrganizationsView.class);
+        }
 
         return menu;
     }

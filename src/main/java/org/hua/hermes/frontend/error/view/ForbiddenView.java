@@ -1,9 +1,12 @@
 package org.hua.hermes.frontend.error.view;
 
+
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.hua.hermes.frontend.view.HomeView;
 
 @Route("403")
+@PageTitle("403 - Forbidden")
 public class ForbiddenView extends ErrorView
 {
     public ForbiddenView()
