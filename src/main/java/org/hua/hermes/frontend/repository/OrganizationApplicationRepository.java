@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface OrganizationApplicationRepository
 {
-    List<Application> findAll(int offset,int limit) throws URISyntaxException;
-    Optional<Application> findById(String id) throws URISyntaxException;
+    List<Application> findAll(int offset,int limit);
+    Optional<Application> findById(String id);
     Integer count();
     boolean update(Application application);
 }
