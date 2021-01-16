@@ -39,6 +39,9 @@ public class OrganizationApplicationsView
         presenter = new OrganizationApplicationsCrudPresenter(repository);
         presenter.setView(this);
 
+        //Remove New Button by setting an empty toolbar
+        this.setToolbar();
+
         setSizeFull();
 
     }
