@@ -74,7 +74,7 @@ public class OrganizationApplicationRepositoryImpl implements OrganizationApplic
     @SneakyThrows(URISyntaxException.class)
     public boolean update(Application application) {
         var url = new URIBuilder(baseURL)
-                .setPathSegments("organization", "application")
+                .setPathSegments("organization", "application", application.getId())
                 .build()
                 .toString();
 
