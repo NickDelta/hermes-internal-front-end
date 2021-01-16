@@ -39,6 +39,8 @@ public class OrganizationApplicationsView
         presenter = new OrganizationApplicationsCrudPresenter(repository);
         presenter.setView(this);
 
+        this.getGrid().addColumn(Application::getId).setHeader("Id");
+
         //Remove New Button by setting an empty toolbar
         this.setToolbar();
 
@@ -66,8 +68,17 @@ public class OrganizationApplicationsView
 
 
     @Override
-    public void setParameter(BeforeEvent event, @OptionalParameter String path)
+    public void setParameter(BeforeEvent event, @OptionalParameter String applicationId)
     {
-        //logic must be filled here
+        if (applicationId != null) {
+            var application = getEditor().getItem();
+            if (application != null && applicationId.equals(application.getId())) {
+                return;
+            }
+            application = presenter.findById(applicationId).orElseThrow(NotFoundException::new);
+            edit(application, EditMode.EXISTING_ITEM);
+        } else {
+            setOpened(false);
+        }
     }
 }
