@@ -11,6 +11,14 @@ import java.util.Objects;
 @NoArgsConstructor
 public abstract class AbstractEntity {
 
+    //Constants
+    public static final String ID_LABEL = "Id";
+    public static final String VERSION_LABEL = "No. of Edits";
+    public static final String CREATED_BY_LABEL = "Applicant";
+    public static final String CREATED_DATE_LABEL = "Created On";
+    public static final String LAST_MODIFIED_BY_LABEL = "Last Modified By";
+    public static final String LAST_MODIFIED_ON_LABEL = "Last Modified On";
+
     @JsonProperty("id")
     private String id;
 
