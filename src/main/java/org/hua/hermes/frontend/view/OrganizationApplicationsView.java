@@ -25,7 +25,6 @@ import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
 import org.hua.hermes.frontend.view.presenter.OrganizationApplicationsCrudPresenter;
-import org.hua.hermes.keycloak.KeycloakTokenHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -43,13 +42,10 @@ public class OrganizationApplicationsView
 {
 
     private final OrganizationApplicationsCrudPresenter presenter;
-    private final KeycloakTokenHelper tokenHelper;
 
-    public OrganizationApplicationsView(@Autowired OrganizationApplicationRepositoryImpl repository,
-                                        @Autowired KeycloakTokenHelper tokenHelper){
+    public OrganizationApplicationsView(@Autowired OrganizationApplicationRepositoryImpl repository){
 
         super(Application.class, new Grid<>(),createEmployeesEditor());
-        this.tokenHelper = tokenHelper;
 
         presenter = new OrganizationApplicationsCrudPresenter(repository);
         presenter.setView(this);
