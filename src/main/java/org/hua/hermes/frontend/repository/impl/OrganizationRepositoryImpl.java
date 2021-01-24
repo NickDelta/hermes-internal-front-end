@@ -1,6 +1,5 @@
 package org.hua.hermes.frontend.repository.impl;
 
-import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
 import org.hua.hermes.keycloak.client.HermesKeycloak;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
@@ -57,10 +56,8 @@ public class OrganizationRepositoryImpl implements OrganizationRepository
 
         if(response.getStatus() == 409)
             throw new ConflictException("Please ensure that there isn't any organization with the name " + organization.getName());
-
-        //Just to be sure
         if(response.getStatus() != 201)
-            throw new InternalServerErrorException("Save failed");
+            throw new RuntimeException("Save failed");
 
         return true;
     }
@@ -72,6 +69,7 @@ public class OrganizationRepositoryImpl implements OrganizationRepository
                 .groups()
                 .group(organization.getId())
                 .update(organization);
+
         return true;
     }
 

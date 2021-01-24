@@ -1,7 +1,6 @@
 package org.hua.hermes.frontend.repository.impl;
 
-import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
-import org.hua.hermes.frontend.repository.OrganizationSupervisorsRepository;
+import org.hua.hermes.frontend.repository.SupervisorRepository;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
 import org.hua.hermes.keycloak.client.HermesKeycloak;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class OrganizationSupervisorsRepositoryImpl implements OrganizationSupervisorsRepository
+public class SupervisorRepositoryImpl implements SupervisorRepository
 {
 
     @Autowired
@@ -63,7 +62,7 @@ public class OrganizationSupervisorsRepositoryImpl implements OrganizationSuperv
 
         //Just to be sure
         if(response.getStatus() != 201)
-            throw new InternalServerErrorException("Save failed");
+            throw new RuntimeException("Save failed");
 
         return true;
     }

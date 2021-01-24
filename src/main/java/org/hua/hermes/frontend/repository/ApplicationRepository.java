@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
-public interface OrganizationApplicationRepository
+public interface ApplicationRepository
 {
     List<Application> findAll(int offset,int limit);
     Optional<Application> findById(String id);

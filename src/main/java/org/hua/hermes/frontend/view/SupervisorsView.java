@@ -1,97 +1,104 @@
 package org.hua.hermes.frontend.view;
 
-import com.vaadin.componentfactory.enhancedcrud.Crud;
-import com.vaadin.componentfactory.enhancedcrud.CrudEditor;
-import com.vaadin.componentfactory.enhancedcrud.CrudEditorPosition;
-import com.vaadin.componentfactory.enhancedcrud.CrudI18n;
+import com.vaadin.componentfactory.enhancedcrud.*;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.*;
 import de.codecamp.vaadin.security.spring.access.SecuredAccess;
-import de.codecamp.vaadin.security.spring.access.route.RouteAccessDeniedException;
+
 import org.hua.hermes.frontend.component.StatusBadge;
 import org.hua.hermes.frontend.constant.RouteConstants;
 import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.UserEntityConstants;
-import org.hua.hermes.frontend.repository.OrganizationEmployeesRepository;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
+import org.hua.hermes.frontend.repository.SupervisorRepository;
 import org.hua.hermes.frontend.util.FormattingConstants;
 import org.hua.hermes.frontend.util.TemplateUtil;
+import org.hua.hermes.frontend.util.UIUtils;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
-import org.hua.hermes.frontend.view.presenter.OrganizationEmployeesCrudPresenter;
-import org.hua.hermes.frontend.view.presenter.OrganizationsCrudPresenter;
-import org.hua.hermes.keycloak.KeycloakTokenHelper;
+import org.hua.hermes.frontend.view.presenter.OrganizationUserCrudPresenter;
+import org.hua.hermes.frontend.view.presenter.OrganizationCrudPresenter;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+
 import static org.hua.hermes.frontend.constant.CrudConstants.DELETE_MESSAGE;
 import static org.hua.hermes.frontend.constant.CrudConstants.DISCARD_MESSAGE;
 
-@Route(value = RouteConstants.PAGE_ORG_EMPLOYEES, layout = MainLayout.class)
-@SecuredAccess(SecurityConstants.HAS_ORG_SUPERVISOR_ROLE)
-public class OrganizationEmployeesView extends Crud<UserRepresentation>
+@Route(value = RouteConstants.PAGE_ORG_SUPERVISORS, layout = MainLayout.class)
+@SecuredAccess(SecurityConstants.HAS_ORGS_ADMIN_ROLE)
+public class SupervisorsView
+        extends Crud<UserRepresentation>
         implements HasNotifications, HasUrlParameter<String>, HasDynamicTitle {
 
-    private final KeycloakTokenHelper keycloakTokenHelper;
-
+    private final OrganizationCrudPresenter orgPresenter;
+    private final OrganizationUserCrudPresenter userPresenter;
     private GroupRepresentation organization;
-    private final OrganizationsCrudPresenter orgPresenter;
-    private final OrganizationEmployeesCrudPresenter orgEmployeesPresenter;
-
-    private final CrudI18n i18n;
-
     private String title = "";
 
-
-    public OrganizationEmployeesView(@Autowired OrganizationRepository orgRepository,
-                                     @Autowired OrganizationEmployeesRepository organizationEmployeesRepository,
-                                     @Autowired CrudEditor<UserRepresentation> userCrudEditor,
-                                     @Autowired KeycloakTokenHelper keycloakTokenHelper) {
+    public SupervisorsView(@Autowired OrganizationRepository orgRepository,
+                           @Autowired SupervisorRepository supervisorsRepository,
+                           @Autowired CrudEditor<UserRepresentation> userCrudEditor)
+    {
         super(UserRepresentation.class, new Grid<>(),userCrudEditor);
-        this.keycloakTokenHelper = keycloakTokenHelper;
 
-        this.orgPresenter = new OrganizationsCrudPresenter(orgRepository);
-        orgPresenter.setView(this);
-
-        this.orgEmployeesPresenter = new OrganizationEmployeesCrudPresenter(organizationEmployeesRepository);
-        orgEmployeesPresenter.setView(this);
-
-        this.i18n = setupI18n();
+        this.orgPresenter = new OrganizationCrudPresenter(orgRepository,this);
+        this.userPresenter = new OrganizationUserCrudPresenter(supervisorsRepository,this);
 
         this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
 
         this.getGrid().setDataProvider(DataProvider.fromCallbacks(
-                fetch -> orgEmployeesPresenter.findAll(organization,fetch.getOffset(),fetch.getLimit()).stream(),
-                count -> orgEmployeesPresenter.count(organization)));
+                fetch -> userPresenter.findAll(organization,fetch.getOffset(),fetch.getLimit()).stream(),
+                count -> userPresenter.count(organization)));
 
         this.setEditorPosition(CrudEditorPosition.ASIDE);
+
+
+        //Create custom toolbar - Needed to put a nice back button to navigate to the Organizations view
+        Button backButton = UIUtils.createButton("Back", VaadinIcon.ARROW_LEFT, ButtonVariant.LUMO_PRIMARY);
+        backButton.getStyle().set("position","absolute");
+        backButton.getStyle().set("bottom","10px");
+        backButton.getStyle().set("left","10px"); //I waited for the buttons not to be aligned but somehow they are with this style
+
+        backButton.addClickListener(listener -> UI.getCurrent().navigate(RouteConstants.PAGE_ORGS_ADMIN));
+
+        Button newItemButton = UIUtils.createButton("New " + UserEntityConstants.SUPERVISOR_NAME, ButtonVariant.LUMO_PRIMARY);
+        newItemButton.addClickListener(e -> this.edit(new UserRepresentation(), Crud.EditMode.NEW_ITEM));
+
+        this.setToolbar(backButton, newItemButton);
 
         //Functional requirements don't have a user delete option so far
         this.getDelete().setEnabled(false);
         this.getDelete().getStyle().set("visibility","hidden");
 
-
         setupGrid(this.getGrid());
-        setI18n(i18n);
+        setI18n(setupI18n());
         setupEventListeners();
 
+        addEditColumn(this.getGrid());
         setSizeFull();
+
     }
 
     public CrudI18n setupI18n()
     {
         CrudI18n crudI18n = CrudI18n.createDefault();
-        crudI18n.setNewItem("New " + UserEntityConstants.EMPLOYEE_NAME);
-        crudI18n.setEditItem("Edit " + UserEntityConstants.EMPLOYEE_NAME);
-        crudI18n.setEditLabel("Edit");
+        crudI18n.setEditItem("Edit " + UserEntityConstants.SUPERVISOR_NAME);
+        crudI18n.setEditLabel("Edit " + UserEntityConstants.SUPERVISOR_NAME);
         crudI18n.getConfirm().getCancel().setContent(DISCARD_MESSAGE);
-        crudI18n.getConfirm().getDelete().setContent(String.format(DELETE_MESSAGE, UserEntityConstants.EMPLOYEE_NAME));
+        crudI18n.getConfirm().getDelete().setContent(String.format(DELETE_MESSAGE, UserEntityConstants.SUPERVISOR_NAME));
         crudI18n.setDeleteItem("Delete");
         return crudI18n;
     }
@@ -101,20 +108,20 @@ public class OrganizationEmployeesView extends Crud<UserRepresentation>
         this.addSaveListener(e -> {
             var user = e.getItem();
             if (user.getId() != null) {
-                if (!orgEmployeesPresenter.update(organization,user))
+                if (!userPresenter.update(organization,user))
                     this.cancelSave();
             } else {
-                if (!orgEmployeesPresenter.save(organization, user))
+                if (!userPresenter.save(organization, user))
                     this.cancelSave();
             }
         });
 
         this.addEditListener(e -> {
-            navigateToUser(e.getItem().getId());
+            navigateToEntity(e.getItem().getId());
             this.getEditor().setItem(e.getItem());
         });
 
-        this.addCancelListener(e -> navigateToUser(null));
+        this.addCancelListener(e -> navigateToEntity(null));
 
     }
 
@@ -157,57 +164,62 @@ public class OrganizationEmployeesView extends Crud<UserRepresentation>
             return badge;
         }).setHeader(UserEntityConstants.ACCOUNT_STATUS_LABEL);
 
-        addEditColumn(grid,i18n);
-
         grid.getColumns().forEach(column -> column.setResizable(true).setAutoWidth(true));
 
     }
 
-    protected void navigateToUser(String empId) {
-        getUI().ifPresent(ui -> ui.navigate(TemplateUtil.generateLocation(RouteConstants.PAGE_ORG_EMPLOYEES, organization.getName(), empId)));
+    protected void navigateToEntity(String id) {
+        getUI().ifPresent(ui -> ui.navigate(TemplateUtil.generateLocation(RouteConstants.PAGE_ORG_SUPERVISORS, organization.getName(), id)));
     }
 
     @Override
-    public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String path) {
-
-        //Expected contents are ["organizations","employees",{organization},{userId}]
+    public void setParameter(BeforeEvent event, @WildcardParameter String path)
+    {
+        //Expected contents are ["organizations","supervisors",{organization},{userId}]
         //Items in {} are optional
-        var paths = beforeEvent.getLocation().getSegments();
+        var paths = event.getLocation().getSegments();
 
-        if(paths.size() > 4)
+        if(paths.size() == 2 || paths.size() > 4 )
             throw new NotFoundException(); //Prevent possible exploits, we expect 2 paths at most
 
-        //Get name of the organization where the supervisor works
-        var orgName = keycloakTokenHelper.getGroup().getParent().getName();
+        //Get selected organization - this is required
+        var orgName = paths.get(2);
 
-        if(paths.size() >= 3){
-            if(!paths.get(2).equals(orgName))
-                throw new RouteAccessDeniedException("User does not belong to the specified organization");
+        try{
+            this.organization = orgPresenter
+                    .findById(orgName)
+                    .orElseThrow(NotFoundException::new);
+        } catch (Exception ex){
+            throw new RuntimeException(ex);
         }
 
-        //Fetch the GroupRepresentation of the organization
-        this.organization = orgPresenter
-                .findById(orgName)
-                .orElseThrow(NotFoundException::new);
+        //Update the view's page title
+        this.title = organization.getName() +"'s " + UserEntityConstants.SUPERVISOR_NAME + "s";
 
-        this.title = organization.getName() +"'s " + UserEntityConstants.EMPLOYEE_NAME + "s";
-
+        //Open editor directly if the URL path contains a user id
+        //that belongs to the specific organization
         if(paths.size() > 3){
             var userId = paths.get(3);
             var item = getEditor().getItem();
             if (item != null && userId.equals(item.getId())) {
                 return;
             }
-            var user = orgEmployeesPresenter
-                    .findById(organization,userId)
-                    .orElseThrow(NotFoundException::new);
-
-            edit(user, EditMode.EXISTING_ITEM);
+            try{
+                var user = userPresenter
+                        .findById(organization,userId)
+                        .orElseThrow(NotFoundException::new);
+                edit(user, EditMode.EXISTING_ITEM);
+            } catch (Exception ex){
+                throw new RuntimeException(ex);
+            }
         }
+
     }
 
+    //This view's title is dynamically determined
     @Override
-    public String getPageTitle() {
+    public String getPageTitle()
+    {
         return title;
     }
 }

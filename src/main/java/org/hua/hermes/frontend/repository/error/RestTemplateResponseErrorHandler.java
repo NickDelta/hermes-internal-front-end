@@ -1,8 +1,5 @@
 package org.hua.hermes.frontend.repository.error;
 
-import com.vaadin.flow.router.NotFoundException;
-import lombok.Setter;
-import org.hua.hermes.frontend.view.HasNotifications;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -27,10 +24,8 @@ public class RestTemplateResponseErrorHandler implements ResponseErrorHandler
     @Override
     public void handleError(ClientHttpResponse httpResponse) throws IOException
     {
-        if(httpResponse.getStatusCode().value() == 403) {
-            throw createException(HttpStatus.FORBIDDEN,httpResponse);
-        } else if (httpResponse.getStatusCode().value() == 404){
-            throw new NotFoundException();
+        if (httpResponse.getStatusCode().value() == 404){
+            throw createException(HttpStatus.NOT_FOUND,httpResponse);
         } else if (httpResponse.getStatusCode().value() == 409){
             throw createException(HttpStatus.CONFLICT,httpResponse);
         } else {
