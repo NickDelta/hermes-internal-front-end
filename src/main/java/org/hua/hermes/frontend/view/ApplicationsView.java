@@ -49,7 +49,7 @@ public class ApplicationsView
 
         presenter = new ApplicationCrudPresenter(repository,this);
 
-        this.setEditorPosition(CrudEditorPosition.ASIDE);
+        this.setEditorPosition(CrudEditorPosition.OVERLAY);
         this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
 
         this.getGrid().setDataProvider(DataProvider.fromCallbacks(
