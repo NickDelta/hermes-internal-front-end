@@ -19,12 +19,13 @@ import org.hua.hermes.frontend.constant.CrudConstants;
 import org.hua.hermes.frontend.constant.RouteConstants;
 import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.OrganizationEntityConstants;
-import org.hua.hermes.frontend.repository.impl.OrganizationApplicationRepositoryImpl;
+import org.hua.hermes.frontend.repository.ApplicationRepository;
+import org.hua.hermes.frontend.repository.impl.ApplicationRepositoryImpl;
 import org.hua.hermes.frontend.util.TemplateUtil;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
-import org.hua.hermes.frontend.view.presenter.OrganizationApplicationsCrudPresenter;
+import org.hua.hermes.frontend.view.presenter.ApplicationCrudPresenter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -36,21 +37,19 @@ import static org.hua.hermes.frontend.util.FormattingConstants.DATETIME_FORMATTE
 @Route(value = RouteConstants.PAGE_ORG_APPLICATIONS, layout = MainLayout.class)
 @PageTitle(RouteConstants.TITLE_APPLICATIONS)
 @SecuredAccess(SecurityConstants.HAS_ORG_EMPLOYEE_ROLE)
-public class OrganizationApplicationsView
+public class ApplicationsView
         extends Crud<Application>
-        implements HasNotifications, HasUrlParameter<String>, HasStyle
-{
+        implements HasNotifications, HasUrlParameter<String> {
 
-    private final OrganizationApplicationsCrudPresenter presenter;
+    private final ApplicationCrudPresenter presenter;
 
-    public OrganizationApplicationsView(@Autowired OrganizationApplicationRepositoryImpl repository){
+    public ApplicationsView(@Autowired ApplicationRepository repository){
 
         super(Application.class, new Grid<>(),createEmployeesEditor());
 
-        presenter = new OrganizationApplicationsCrudPresenter(repository);
-        presenter.setView(this);
+        presenter = new ApplicationCrudPresenter(repository,this);
 
-        this.setEditorPosition(CrudEditorPosition.ASIDE);
+        this.setEditorPosition(CrudEditorPosition.OVERLAY);
         this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
 
         this.getGrid().setDataProvider(DataProvider.fromCallbacks(
@@ -184,8 +183,14 @@ public class OrganizationApplicationsView
             if (application != null && id.equals(application.getId())) {
                 return;
             }
-            application = presenter.findById(id).orElseThrow(NotFoundException::new);
-            edit(application, EditMode.EXISTING_ITEM);
+            try{
+                application = presenter
+                        .findById(id)
+                        .orElseThrow(NotFoundException::new);
+                edit(application, EditMode.EXISTING_ITEM);
+            } catch (Exception ex){
+                throw new RuntimeException(ex);
+            }
         } else {
             setOpened(false);
         }

@@ -1,35 +1,32 @@
 package org.hua.hermes.frontend.view.presenter;
 
-import lombok.Setter;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
-import org.hua.hermes.frontend.repository.OrganizationEmployeesRepository;
+import org.hua.hermes.frontend.repository.OrganizationUserRepository;
 import org.hua.hermes.frontend.view.HasNotifications;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+
 import javax.ws.rs.NotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
+@AllArgsConstructor
 @Log4j2
-public class OrganizationEmployeesCrudPresenter
+public class OrganizationUserCrudPresenter
 {
-    protected final OrganizationEmployeesRepository repository;
+    private final OrganizationUserRepository repository;
+    private final HasNotifications view;
 
-    @Setter
-    protected HasNotifications view;
-
-    public OrganizationEmployeesCrudPresenter(OrganizationEmployeesRepository repository) {
-        this.repository = repository;
-    }
-
-    public Optional<UserRepresentation> findById(GroupRepresentation organization, String empId) {
+    public Optional<UserRepresentation> findById(GroupRepresentation organization, String empId)
+            throws Exception
+    {
         try {
             return execute(() -> repository.findById(organization, empId));
-        } catch (Exception e) {
+        } catch (NotFoundException ex) {
             return Optional.empty();
         }
     }
@@ -74,31 +71,23 @@ public class OrganizationEmployeesCrudPresenter
         }
     }
 
-    protected <V> V execute(Callable<V> callable)
+    protected <V> V execute(Callable<V> callable) throws Exception
     {
         if(view == null) throw new IllegalStateException("View has not been set");
         try{
             return callable.call();
-        } catch (NotFoundException ex){
-            //If resource is not found then go to the beautiful 404 page
-            log.error(ex);
-            throw new com.vaadin.flow.router.NotFoundException();
-        }
-        catch (ConflictException ex){
+        } catch (ConflictException ex){
             //In case of conflict inform the user about it.
             //Unfortunately, keycloak's API doesn't return any info on what caused the conflict.
-            log.error(ex);
-            consumeError("A conflict has occurred. " + ex.getMessage());
+            view.showNotification("A conflict has occurred. " + ex.getMessage());
             throw ex;
+        } catch (NotFoundException ex) {
+            throw ex; //We don't want to show a notification in this case.
         } catch (Exception ex){
-            //We treat any other exception as a 500 because that is not intended behavior.
             log.error(ex);
-            throw new InternalServerErrorException(ex);
+            view.showNotification("Something went wrong. Please try executing the same action again.");
+            throw ex;
         }
-    }
-
-    private void consumeError(String message) {
-        view.showNotification(message);
     }
 
 }

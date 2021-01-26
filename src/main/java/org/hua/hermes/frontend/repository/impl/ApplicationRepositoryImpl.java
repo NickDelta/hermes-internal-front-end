@@ -3,12 +3,10 @@ package org.hua.hermes.frontend.repository.impl;
 import lombok.SneakyThrows;
 import org.apache.http.client.utils.URIBuilder;
 import org.hua.hermes.backend.entity.Application;
-import org.hua.hermes.frontend.repository.OrganizationApplicationRepository;
+import org.hua.hermes.frontend.repository.ApplicationRepository;
 import org.hua.hermes.frontend.repository.error.RestTemplateResponseErrorHandler;
-import org.hua.hermes.frontend.view.HasNotifications;
 import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -19,14 +17,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class OrganizationApplicationRepositoryImpl implements OrganizationApplicationRepository {
+public class ApplicationRepositoryImpl implements ApplicationRepository
+{
 
     private final KeycloakRestTemplate client;
 
     @Value("${hermes.backend.url}")
     private String baseURL;
 
-    public OrganizationApplicationRepositoryImpl(KeycloakRestTemplate client){
+    public ApplicationRepositoryImpl(KeycloakRestTemplate client){
         this.client = client;
         this.client.setErrorHandler(new RestTemplateResponseErrorHandler());
     }

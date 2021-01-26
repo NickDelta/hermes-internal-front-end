@@ -203,6 +203,7 @@ public class UserCrudEditorFactory
         //region Password binds + Status listener for alert
         binder.forField(password)
                 .asRequired(Validator.from(p -> {
+                    if (editor.getItem() == null) return true;
                     if (editor.getItem().getId() != null) return true;
                     return !p.isEmpty();
                 }, ValidationConstants.REQUIRED_TEXT))
@@ -216,6 +217,7 @@ public class UserCrudEditorFactory
 
         binder.forField(confirmPassword)
                 .asRequired(Validator.from(p -> {
+                    if (editor.getItem() == null) return true;
                     if (editor.getItem().getId() != null) return true;
                     return !p.isEmpty();
                 }, ValidationConstants.REQUIRED_TEXT))

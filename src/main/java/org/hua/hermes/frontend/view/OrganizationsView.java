@@ -21,7 +21,7 @@ import org.hua.hermes.frontend.constant.entity.OrganizationEntityConstants;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
 import org.hua.hermes.frontend.util.TemplateUtil;
 
-import org.hua.hermes.frontend.view.presenter.OrganizationsCrudPresenter;
+import org.hua.hermes.frontend.view.presenter.OrganizationCrudPresenter;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,18 +32,16 @@ import java.util.Objects;
 @SecuredAccess(RouteConstants.SECURITY_ORGS_ADMIN)
 public class OrganizationsView
         extends Crud<GroupRepresentation>
-        implements HasNotifications, HasUrlParameter<String>, HasStyle
-{
+        implements HasNotifications, HasUrlParameter<String> {
 
-    private final OrganizationsCrudPresenter presenter;
+    private final OrganizationCrudPresenter presenter;
 
     public OrganizationsView(@Autowired OrganizationRepository organizationRepository)
     {
         super(GroupRepresentation.class, new Grid<>(),createOrganizationEditor());
 
         //Initialize CRUD Presenter
-        this.presenter = new OrganizationsCrudPresenter(organizationRepository);
-        presenter.setView(this);
+        this.presenter = new OrganizationCrudPresenter(organizationRepository,this);
 
         //Allows selecting up to 1 items from grid
         this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
@@ -160,8 +158,15 @@ public class OrganizationsView
             if (organization != null && orgName.equals(organization.getName())) {
                 return;
             }
-            presenter.findById(orgName).ifPresent(userRepresentation ->
-                    edit(userRepresentation, EditMode.EXISTING_ITEM));
+            try {
+                organization = presenter
+                        .findById(orgName)
+                        .orElseThrow(NotFoundException::new);
+                edit(organization, EditMode.EXISTING_ITEM);
+            } catch (Exception ex){
+                throw new RuntimeException(ex);
+            }
+
         } else {
             setOpened(false);
         }

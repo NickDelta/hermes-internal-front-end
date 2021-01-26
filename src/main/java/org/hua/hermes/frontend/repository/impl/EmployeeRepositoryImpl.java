@@ -1,7 +1,6 @@
 package org.hua.hermes.frontend.repository.impl;
 
-import org.hua.hermes.frontend.error.exception.InternalServerErrorException;
-import org.hua.hermes.frontend.repository.OrganizationEmployeesRepository;
+import org.hua.hermes.frontend.repository.EmployeeRepository;
 import org.hua.hermes.keycloak.client.HermesKeycloak;
 import org.hua.hermes.keycloak.client.exception.ConflictException;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -13,14 +12,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class OrganizationEmployeesRepositoryImpl implements OrganizationEmployeesRepository {
+public class EmployeeRepositoryImpl implements EmployeeRepository
+{
 
     private final HermesKeycloak client;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public OrganizationEmployeesRepositoryImpl(HermesKeycloak client) {
+    public EmployeeRepositoryImpl(HermesKeycloak client) {
         this.client = client;
     }
 
@@ -64,7 +64,7 @@ public class OrganizationEmployeesRepositoryImpl implements OrganizationEmployee
         if(response.getStatus() == 409)
             throw new ConflictException("Please ensure that there isn't any user with the same username or password.");
         if(response.getStatus() != 201)
-            throw new InternalServerErrorException("Save failed.");
+            throw new RuntimeException("Save failed.");
 
         return true;
     }
