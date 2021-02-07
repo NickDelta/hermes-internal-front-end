@@ -7,6 +7,7 @@ import com.vaadin.componentfactory.enhancedcrud.CrudI18n;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
 import de.codecamp.vaadin.security.spring.access.SecuredAccess;
 import de.codecamp.vaadin.security.spring.access.route.RouteAccessDeniedException;
 import org.hua.hermes.frontend.component.StatusBadge;
@@ -15,8 +16,8 @@ import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.UserEntityConstants;
 import org.hua.hermes.frontend.repository.EmployeeRepository;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
-import org.hua.hermes.frontend.util.FormattingConstants;
-import org.hua.hermes.frontend.util.TemplateUtil;
+import org.hua.hermes.frontend.util.DateTimeUtils;
+import org.hua.hermes.frontend.util.NavigationUtil;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
@@ -29,9 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import static org.hua.hermes.frontend.constant.CrudConstants.DELETE_MESSAGE;
-import static org.hua.hermes.frontend.constant.CrudConstants.DISCARD_MESSAGE;
+import java.time.format.FormatStyle;
+
+import static org.hua.hermes.frontend.constant.MessageConstants.DELETE_MESSAGE;
+import static org.hua.hermes.frontend.constant.MessageConstants.DISCARD_MESSAGE;
 
 @Route(value = RouteConstants.PAGE_ORG_EMPLOYEES, layout = MainLayout.class)
 @SecuredAccess(SecurityConstants.HAS_ORG_SUPERVISOR_ROLE)
@@ -133,10 +135,11 @@ public class EmployeesView extends Crud<UserRepresentation>
         grid.addColumn(user -> user.firstAttribute(UserEntityConstants.COUNTRY)).setHeader(UserEntityConstants.COUNTRY_LABEL);
 
         grid.addColumn(user -> {
-            //FIXME Zone is not flexible but we don't care. It's an university project. But maybe this is fixed in the future
-            LocalDateTime creationDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getCreatedTimestamp()), ZoneId.of("Europe/Athens"));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FormattingConstants.DATE_TIME_FORMAT);
-            return creationDate.format(formatter);
+            LocalDateTime creationDate = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(user.getCreatedTimestamp()),
+                    VaadinSession.getCurrent().getAttribute(ZoneId.class)
+            );
+            return DateTimeUtils.formatDate(FormatStyle.SHORT,creationDate);
         }).setHeader(UserEntityConstants.CREATED_ON_LABEL);
 
         grid.addComponentColumn(user -> {
@@ -161,7 +164,7 @@ public class EmployeesView extends Crud<UserRepresentation>
     }
 
     protected void navigateToUser(String empId) {
-        getUI().ifPresent(ui -> ui.navigate(TemplateUtil.generateLocation(RouteConstants.PAGE_ORG_EMPLOYEES, organization.getName(), empId)));
+        getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(RouteConstants.PAGE_ORG_EMPLOYEES, organization.getName(), empId)));
     }
 
     @Override
@@ -175,7 +178,7 @@ public class EmployeesView extends Crud<UserRepresentation>
             throw new NotFoundException(); //Prevent possible exploits, we expect 2 paths at most
 
         //Get name of the organization where the supervisor works
-        var orgName = keycloakTokenHelper.getGroup().getParent().getName();
+        var orgName = keycloakTokenHelper.getOrganization().getName();
 
         if(paths.size() >= 3){
             if(!paths.get(2).equals(orgName))

@@ -5,13 +5,11 @@ import lombok.Getter;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
-@Getter
 public class ConflictException extends ClientErrorException
 {
 
-    public ConflictException()
-    {
-        super("The resource cannot be created due to a conflict", Response.Status.CONFLICT);
+    public ConflictException() {
+        super("The resource cannot be created/updated due to a conflict", Response.Status.CONFLICT);
     }
 
     public ConflictException(String message)

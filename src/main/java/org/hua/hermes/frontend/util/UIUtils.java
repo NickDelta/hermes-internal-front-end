@@ -25,17 +25,6 @@ import java.util.Locale;
  */
 public class UIUtils
 {
-
-	public static final String IMG_PATH = "images/";
-
-	/**
-	 * Thread-unsafe formatters.
-	 */
-	private static final ThreadLocal<DecimalFormat> decimalFormat = ThreadLocal
-			.withInitial(() -> new DecimalFormat("###,###.00", DecimalFormatSymbols.getInstance(Locale.US)));
-	private static final ThreadLocal<DateTimeFormatter> dateFormat = ThreadLocal
-			.withInitial(() -> DateTimeFormatter.ofPattern("MMM dd, YYYY"));
-
 	/* ==== BUTTONS ==== */
 
 	// Styles
@@ -285,32 +274,6 @@ public class UIUtils
 		return button;
 	}
 
-	/* === NUMBERS === */
-
-	public static String formatAmount(Double amount) {
-		return decimalFormat.get().format(amount);
-	}
-
-	public static String formatAmount(int amount) {
-		return decimalFormat.get().format(amount);
-	}
-
-	public static Label createAmountLabel(double amount) {
-		Label label = createH5Label(formatAmount(amount));
-		label.addClassName(LumoStyles.FontFamily.MONOSPACE);
-		return label;
-	}
-
-	public static String formatUnits(int units) {
-		return NumberFormat.getIntegerInstance().format(units);
-	}
-
-	public static Label createUnitsLabel(int units) {
-		Label label = new Label(formatUnits(units));
-		label.addClassName(LumoStyles.FontFamily.MONOSPACE);
-		return label;
-	}
-
 	/* === ICONS === */
 
 	public static Icon createPrimaryIcon(VaadinIcon icon) {
@@ -369,12 +332,6 @@ public class UIUtils
 		i.addClassNames(size.getClassName());
 		setTextColor(color, i);
 		return i;
-	}
-
-	/* === DATES === */
-
-	public static String formatDate(LocalDate date) {
-		return dateFormat.get().format(date);
 	}
 
 	/* === NOTIFICATIONS === */

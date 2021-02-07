@@ -8,6 +8,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
 import de.codecamp.vaadin.security.spring.access.SecuredAccess;
 
 import org.hua.hermes.frontend.component.StatusBadge;
@@ -16,8 +17,8 @@ import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.UserEntityConstants;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
 import org.hua.hermes.frontend.repository.SupervisorRepository;
-import org.hua.hermes.frontend.util.FormattingConstants;
-import org.hua.hermes.frontend.util.TemplateUtil;
+import org.hua.hermes.frontend.util.DateTimeUtils;
+import org.hua.hermes.frontend.util.NavigationUtil;
 import org.hua.hermes.frontend.util.UIUtils;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
@@ -32,10 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
-import static org.hua.hermes.frontend.constant.CrudConstants.DELETE_MESSAGE;
-import static org.hua.hermes.frontend.constant.CrudConstants.DISCARD_MESSAGE;
+import static org.hua.hermes.frontend.constant.MessageConstants.DELETE_MESSAGE;
+import static org.hua.hermes.frontend.constant.MessageConstants.DISCARD_MESSAGE;
 
 @Route(value = RouteConstants.PAGE_ORG_SUPERVISORS, layout = MainLayout.class)
 @SecuredAccess(SecurityConstants.HAS_ORGS_ADMIN_ROLE)
@@ -95,6 +96,7 @@ public class SupervisorsView
     public CrudI18n setupI18n()
     {
         CrudI18n crudI18n = CrudI18n.createDefault();
+        crudI18n.setNewItem("New " + UserEntityConstants.SUPERVISOR_NAME);
         crudI18n.setEditItem("Edit " + UserEntityConstants.SUPERVISOR_NAME);
         crudI18n.setEditLabel("Edit " + UserEntityConstants.SUPERVISOR_NAME);
         crudI18n.getConfirm().getCancel().setContent(DISCARD_MESSAGE);
@@ -134,7 +136,12 @@ public class SupervisorsView
         grid.addColumn(user -> user.firstAttribute(UserEntityConstants.GENDER)).setHeader(UserEntityConstants.GENDER_LABEL);
         grid.addColumn(user -> user.firstAttribute(UserEntityConstants.PHONE)).setHeader(UserEntityConstants.PHONE_LABEL);
         grid.addColumn(UserRepresentation::getEmail).setHeader(UserEntityConstants.EMAIL_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.BIRTHDATE)).setHeader(UserEntityConstants.BIRTHDATE_LABEL);
+        grid.addColumn(user -> {
+            var date = UserEntityConstants.BIRTHDATE_FORMATTER
+                    .parse(user.firstAttribute(UserEntityConstants.BIRTHDATE));
+
+            return DateTimeUtils.formatDate(FormatStyle.SHORT,date);
+        }).setHeader(UserEntityConstants.BIRTHDATE_LABEL);
 
         grid.addColumn(user -> user.firstAttribute(UserEntityConstants.STREET_ADDRESS)).setHeader(UserEntityConstants.STREET_ADDRESS_LABEL);
         grid.addColumn(user -> user.firstAttribute(UserEntityConstants.POSTAL_CODE)).setHeader(UserEntityConstants.POSTAL_CODE_LABEL);
@@ -143,10 +150,11 @@ public class SupervisorsView
         grid.addColumn(user -> user.firstAttribute(UserEntityConstants.COUNTRY)).setHeader(UserEntityConstants.COUNTRY_LABEL);
 
         grid.addColumn(user -> {
-            //FIXME Zone is not flexible but we don't care. It's an university project. But maybe this is fixed in the future
-            LocalDateTime creationDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getCreatedTimestamp()), ZoneId.of("Europe/Athens"));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FormattingConstants.DATE_TIME_FORMAT);
-            return creationDate.format(formatter);
+            LocalDateTime creationDate = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(user.getCreatedTimestamp()),
+                    VaadinSession.getCurrent().getAttribute(ZoneId.class)
+            );
+            return DateTimeUtils.formatDateTime(FormatStyle.SHORT,creationDate);
         }).setHeader(UserEntityConstants.CREATED_ON_LABEL);
 
         grid.addComponentColumn(user -> {
@@ -169,7 +177,7 @@ public class SupervisorsView
     }
 
     protected void navigateToEntity(String id) {
-        getUI().ifPresent(ui -> ui.navigate(TemplateUtil.generateLocation(RouteConstants.PAGE_ORG_SUPERVISORS, organization.getName(), id)));
+        getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(RouteConstants.PAGE_ORG_SUPERVISORS, organization.getName(), id)));
     }
 
     @Override

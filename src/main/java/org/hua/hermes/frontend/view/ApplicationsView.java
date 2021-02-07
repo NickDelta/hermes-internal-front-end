@@ -1,7 +1,6 @@
 package org.hua.hermes.frontend.view;
 
 import com.vaadin.componentfactory.enhancedcrud.*;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
@@ -15,13 +14,13 @@ import de.codecamp.vaadin.security.spring.access.SecuredAccess;
 import org.hua.hermes.backend.entity.Application;
 import org.hua.hermes.backend.entity.ApplicationState;
 import org.hua.hermes.frontend.component.StatusBadge;
-import org.hua.hermes.frontend.constant.CrudConstants;
+import org.hua.hermes.frontend.constant.MessageConstants;
 import org.hua.hermes.frontend.constant.RouteConstants;
 import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.OrganizationEntityConstants;
 import org.hua.hermes.frontend.repository.ApplicationRepository;
-import org.hua.hermes.frontend.repository.impl.ApplicationRepositoryImpl;
-import org.hua.hermes.frontend.util.TemplateUtil;
+import org.hua.hermes.frontend.util.DateTimeUtils;
+import org.hua.hermes.frontend.util.NavigationUtil;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
 import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
@@ -32,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hua.hermes.frontend.constant.RouteConstants.PAGE_ORG_APPLICATIONS;
-import static org.hua.hermes.frontend.util.FormattingConstants.DATETIME_FORMATTER;
 
 @Route(value = RouteConstants.PAGE_ORG_APPLICATIONS, layout = MainLayout.class)
 @PageTitle(RouteConstants.TITLE_APPLICATIONS)
@@ -77,8 +75,8 @@ public class ApplicationsView
         crudI18n.setNewItem("New " + Application.ENTITY_NAME);
         crudI18n.setEditItem("Edit " + Application.ENTITY_NAME);
         crudI18n.setEditLabel("Edit" + Application.ENTITY_NAME);
-        crudI18n.getConfirm().getCancel().setContent(CrudConstants.DISCARD_MESSAGE);
-        crudI18n.getConfirm().getDelete().setContent(String.format(CrudConstants.DELETE_MESSAGE, OrganizationEntityConstants.ENTITY_NAME));
+        crudI18n.getConfirm().getCancel().setContent(MessageConstants.DISCARD_MESSAGE);
+        crudI18n.getConfirm().getDelete().setContent(String.format(MessageConstants.DELETE_MESSAGE, OrganizationEntityConstants.ENTITY_NAME));
         crudI18n.setDeleteItem("Delete");
         return crudI18n;
     }
@@ -102,16 +100,16 @@ public class ApplicationsView
     }
 
     private void navigateToApplication(String id) {
-        getUI().ifPresent(ui -> ui.navigate(TemplateUtil.generateLocation(PAGE_ORG_APPLICATIONS, id)));
+        getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(PAGE_ORG_APPLICATIONS, id)));
     }
 
     protected void setupGrid(Grid<Application> grid)
     {
         grid.addColumn(Application::getId).setHeader(Application.ID_LABEL);
         grid.addColumn(Application::getCreatedBy).setHeader(Application.CREATED_BY_LABEL);
-        grid.addColumn((application) -> DATETIME_FORMATTER.format(application.getCreatedDate())).setHeader(Application.CREATED_DATE_LABEL);
+        grid.addColumn((application) -> DateTimeUtils.formatDateTime(application.getCreatedDate())).setHeader(Application.CREATED_DATE_LABEL);
         grid.addColumn(Application::getLastModifiedBy).setHeader(Application.LAST_MODIFIED_BY_LABEL);
-        grid.addColumn((application) -> DATETIME_FORMATTER.format(application.getLastModifiedDate())).setHeader(Application.LAST_MODIFIED_ON_LABEL);
+        grid.addColumn((application) -> DateTimeUtils.formatDateTime(application.getLastModifiedDate())).setHeader(Application.LAST_MODIFIED_ON_LABEL);
 
         grid.addComponentColumn(application -> {
             BadgeColor color;
@@ -138,7 +136,7 @@ public class ApplicationsView
             return badge;
         }).setHeader(Application.STATE_LABEL);
 
-        grid.addColumn((application) -> DATETIME_FORMATTER.format(application.getAppointmentDate())).setHeader(Application.APPOINTMENT_DATE_LABEL);
+        grid.addColumn((application) -> DateTimeUtils.formatDateTime(application.getAppointmentDate())).setHeader(Application.APPOINTMENT_DATE_LABEL);
 
         grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> {
             var label = new Label("Details:");

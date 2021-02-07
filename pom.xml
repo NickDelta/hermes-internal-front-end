@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.7.RELEASE</version>
+		<version>2.3.8.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.hua.hermes</groupId>
@@ -16,8 +16,8 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<vaadin.version>14.4.4</vaadin.version>
-		<keycloak.version>12.0.1</keycloak.version>
+		<vaadin.version>14.4.7</vaadin.version>
+		<keycloak.version>12.0.2</keycloak.version>
 	</properties>
 
 	<dependencyManagement>
@@ -99,10 +99,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>de.codecamp.vaadin</groupId>
 			<artifactId>vaadin-security-spring-boot-starter</artifactId>
 			<version>1.0.0</version>
@@ -119,16 +115,40 @@
 			<version>1.4.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-confirm-dialog-flow</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.7</version>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<!-- Production mode is activated using -Pproduction -->
+			<id>production</id>
+			<properties>
+				<vaadin.productionMode>true</vaadin.productionMode>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.vaadin</groupId>
+						<artifactId>vaadin-maven-plugin</artifactId>
+						<version>${vaadin.version}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-frontend</goal>
+									<goal>build-frontend</goal>
+								</goals>
+								<phase>compile</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 
 	<build>
 		<plugins>

@@ -1,5 +1,6 @@
 package org.hua.hermes.keycloak.client;
 
+import org.hua.hermes.keycloak.client.resources.CitizensResource;
 import org.hua.hermes.keycloak.client.resources.OrganizationsResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -96,6 +97,10 @@ public class HermesKeycloak implements AutoCloseable
 
     public OrganizationsResource organizations(){
         return target.proxy(OrganizationsResource.class);
+    }
+
+    public CitizensResource citizens(){
+        return target.proxy(CitizensResource.class);
     }
 
     public ServerInfoResource serverInfo() {

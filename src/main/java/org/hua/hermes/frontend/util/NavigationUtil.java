@@ -2,7 +2,7 @@ package org.hua.hermes.frontend.util;
 
 import java.util.Arrays;
 
-public class TemplateUtil
+public class NavigationUtil
 {
 	public static String generateLocation(String basePage, String... paths) {
 

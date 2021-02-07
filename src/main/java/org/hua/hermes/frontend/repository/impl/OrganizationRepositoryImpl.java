@@ -13,7 +13,6 @@ import java.util.Optional;
 @Repository
 public class OrganizationRepositoryImpl implements OrganizationRepository
 {
-
     private final HermesKeycloak client;
 
     @Value("${keycloak.realm}")
@@ -23,7 +22,6 @@ public class OrganizationRepositoryImpl implements OrganizationRepository
     {
         this.client = client;
     }
-
 
     @Override
     public Optional<GroupRepresentation> findById(String orgName)

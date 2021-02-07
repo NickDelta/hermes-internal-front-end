@@ -62,7 +62,7 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         super.configure(http);
         new VaadinSecurityConfigurer(vaadinSecurityProperties).configure(http);
         http.requestMatchers().antMatchers("/sso/login", "/sso/logout");
-        http.logout().logoutUrl("/sso/logout"); //TODO Vaadin security config messes with the logout URL, I'm not sure yet if this will work.
+        http.logout().logoutUrl("/sso/logout");
         http.authorizeRequests();
     }
 

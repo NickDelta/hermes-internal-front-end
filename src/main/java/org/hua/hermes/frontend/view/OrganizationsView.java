@@ -1,11 +1,10 @@
 package org.hua.hermes.frontend.view;
 
 import com.vaadin.componentfactory.enhancedcrud.*;
-import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.*;
@@ -14,12 +13,13 @@ import de.codecamp.vaadin.security.spring.access.SecuredAccess;
 
 import static org.hua.hermes.frontend.constant.RouteConstants.PAGE_ORGS_ADMIN;
 
-import org.hua.hermes.frontend.constant.CrudConstants;
+import org.hua.hermes.frontend.component.TrimmedTextField;
 import org.hua.hermes.frontend.constant.RouteConstants;
-import org.hua.hermes.frontend.constant.ValidationConstants;
+import org.hua.hermes.frontend.constant.MessageConstants;
+import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.OrganizationEntityConstants;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
-import org.hua.hermes.frontend.util.TemplateUtil;
+import org.hua.hermes.frontend.util.NavigationUtil;
 
 import org.hua.hermes.frontend.view.presenter.OrganizationCrudPresenter;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -29,7 +29,7 @@ import java.util.Objects;
 
 @Route(value = PAGE_ORGS_ADMIN, layout = MainLayout.class)
 @PageTitle(RouteConstants.TITLE_ORGS_ADMIN)
-@SecuredAccess(RouteConstants.SECURITY_ORGS_ADMIN)
+@SecuredAccess(SecurityConstants.HAS_ORGS_ADMIN_ROLE)
 public class OrganizationsView
         extends Crud<GroupRepresentation>
         implements HasNotifications, HasUrlParameter<String> {
@@ -78,8 +78,8 @@ public class OrganizationsView
         crudI18n.setNewItem("New " + OrganizationEntityConstants.ENTITY_NAME);
         crudI18n.setEditItem("Edit " + OrganizationEntityConstants.ENTITY_NAME);
         crudI18n.setEditLabel("Edit " + OrganizationEntityConstants.ENTITY_NAME);
-        crudI18n.getConfirm().getCancel().setContent(CrudConstants.DISCARD_MESSAGE);
-        crudI18n.getConfirm().getDelete().setContent(String.format(CrudConstants.DELETE_MESSAGE, OrganizationEntityConstants.ENTITY_NAME));
+        crudI18n.getConfirm().getCancel().setContent(MessageConstants.DISCARD_MESSAGE);
+        crudI18n.getConfirm().getDelete().setContent(String.format(MessageConstants.DELETE_MESSAGE, OrganizationEntityConstants.ENTITY_NAME));
         crudI18n.setDeleteItem("Delete");
         return crudI18n;
     }
@@ -126,7 +126,8 @@ public class OrganizationsView
         contextMenu.addItem("Manage Supervisors",listener ->
                 listener.getItem().ifPresent(action ->
                     getUI().ifPresent(ui ->
-                        ui.navigate(RouteConstants.PAGE_ORG_SUPERVISORS + "/" + action.getName()))));
+                        ui.navigate(RouteConstants.PAGE_ORG_SUPERVISORS + "/" + action.getName()))))
+                .setCheckable(false);
 
         addEditColumn(grid);
     }
@@ -134,20 +135,20 @@ public class OrganizationsView
 
     private static CrudEditor<GroupRepresentation> createOrganizationEditor(){
 
-        TextField name = new TextField(OrganizationEntityConstants.NAME);
+        TrimmedTextField name = new TrimmedTextField(OrganizationEntityConstants.NAME);
         FormLayout layout = new FormLayout(name);
 
         var binder = new Binder<>(GroupRepresentation.class);
 
         binder.forField(name)
-                .asRequired(ValidationConstants.REQUIRED_TEXT)
-                .bind(GroupRepresentation::getName,GroupRepresentation::setName);
+                .asRequired(MessageConstants.REQUIRED)
+                .bind(GroupRepresentation::getName, GroupRepresentation::setName);
 
         return new BinderCrudEditor<>(binder, layout);
     }
 
     protected void navigateToOrganization(String orgName) {
-        getUI().ifPresent(ui -> ui.navigate(TemplateUtil.generateLocation(PAGE_ORGS_ADMIN,orgName)));
+        getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(PAGE_ORGS_ADMIN,orgName)));
     }
 
     @Override
