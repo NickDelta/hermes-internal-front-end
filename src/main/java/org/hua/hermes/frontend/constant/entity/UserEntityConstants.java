@@ -6,6 +6,7 @@ public class UserEntityConstants
 {
     public static final String SUPERVISOR_NAME = "Supervisor";
     public static final String EMPLOYEE_NAME = "Employee";
+    public static final String CITIZEN_NAME = "Citizen";
 
     public static final String ID_LABEL = "Id";
     public static final String USERNAME_LABEL = "Username";

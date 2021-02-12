@@ -109,6 +109,7 @@ public class MainLayout extends AppLayout implements PageConfigurator
 
         if(VaadinSecurity.check().hasRole("ROLE_ORGS_ADMIN")){
             menu.addNaviItem(VaadinIcon.BUILDING,"Organizations", OrganizationsView.class);
+            menu.addNaviItem(VaadinIcon.USERS,"Citizens",CitizensView.class);
         }
 
         if(VaadinSecurity.check().hasRole("ROLE_ORG_SUPERVISOR")) {
