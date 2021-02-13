@@ -1,5 +1,7 @@
 package org.hua.hermes.frontend.constant.entity;
 
+import java.time.format.DateTimeFormatter;
+
 public class UserEntityConstants
 {
     public static final String SUPERVISOR_NAME = "Supervisor";
@@ -14,6 +16,7 @@ public class UserEntityConstants
     //We respect all genders. After a quick research there are 25+ mainstream genders.
     //If this were a professional app, we would handle this differently.
     public static final String[] GENDER_CHOICES = {"Male", "Female", "Other"};
+
     public static final String PHONE_LABEL = "Phone Number";
     public static final String EMAIL_LABEL = "Email";
     public static final String ENABLED_LABEL = "User Enabled";
@@ -29,7 +32,12 @@ public class UserEntityConstants
     public static final String CREATED_ON_LABEL = "Created On";
     public static final String ACCOUNT_STATUS_LABEL = "Account Status";
 
+    public static final String DATE_FORMAT = "dd/MM/yyyy";
+    //Format in which birthdate is stored in Keycloak
+    public static final DateTimeFormatter BIRTHDATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
     public static final String BIRTHDATE = "birthdate";
+
     public static final String PHONE = "phone_number";
     public static final String GENDER = "gender";
     public static final String STREET_ADDRESS = "street_address";
@@ -38,6 +46,5 @@ public class UserEntityConstants
     public static final String REGION = "region";
     public static final String COUNTRY = "country";
     public static final String FORMATTED_LOCATION = "formatted";
-
 
 }

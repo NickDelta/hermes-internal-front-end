@@ -15,7 +15,7 @@ public class NotFoundView extends ErrorView
                 "The page you are looking for does not exist. " +
                           "How you got here is a mystery. " +
                           "But you can click the button below to go back to the homepage.",
-                "/images/ancient-person-questioning.jpg",
+                "/images/ancient-person-questioning.png",
                 "ancient-person-questioning");
 
         getHomeButton().addClickListener(listener -> {

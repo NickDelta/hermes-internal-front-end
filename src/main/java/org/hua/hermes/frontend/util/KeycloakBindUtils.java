@@ -10,12 +10,15 @@ public class KeycloakBindUtils
 {
     public static void setAttribute(UserRepresentation user, String field, String value)
     {
-        var attributes = user.getAttributes(); //If user doesn't have any attributes, null will be returned.
+        //If user doesn't have any attributes, null will be returned.
+        var attributes = user.getAttributes();
         if(attributes == null) {
             attributes = new HashMap<>();
             user.setAttributes(attributes);
         }
-        if(value != null && !value.isEmpty()) //If we have an empty value and don't delete key map key then the attribute will remain
+
+        //If we have an empty value and don't delete key map key then the attribute will remain
+        if(value != null && !value.isEmpty())
             attributes.put(field, List.of(value));
         else
             attributes.remove(field);

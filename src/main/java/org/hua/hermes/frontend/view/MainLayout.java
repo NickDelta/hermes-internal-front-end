@@ -1,29 +1,38 @@
 package org.hua.hermes.frontend.view;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Viewport;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.server.InitialPageSettings;
+import com.vaadin.flow.server.PageConfigurator;
+import com.vaadin.flow.server.VaadinSession;
 import de.codecamp.vaadin.security.spring.access.VaadinSecurity;
 import org.hua.hermes.frontend.component.NaviMenu;
+import org.hua.hermes.frontend.util.DateTimeUtils;
 import org.hua.hermes.frontend.util.UIUtils;
 import org.hua.hermes.frontend.util.style.FontWeight;
 import org.hua.hermes.frontend.util.style.css.TextAlign;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
-/**
- * The main view is a top-level placeholder for other views.
- */
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+
+
 @JsModule("./styles/shared-styles.js")
 @CssImport(value = "./styles/components/floating-action-button.css", themeFor = "vaadin-button")
 @CssImport(value = "./styles/components/grid.css", themeFor = "vaadin-grid")
@@ -35,14 +44,27 @@ import org.hua.hermes.frontend.util.style.css.TextAlign;
 @CssImport("./styles/lumo/shadow.css")
 @CssImport("./styles/lumo/spacing.css")
 @CssImport("./styles/lumo/typography.css")
-public class MainLayout extends AppLayout
+@Viewport("width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes, viewport-fit=cover")
+public class MainLayout extends AppLayout implements PageConfigurator
 {
 
     private H1 viewTitle;
 
-    public MainLayout() {
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakBaseURL;
+
+    private Set<Locale> locales;
+    private List<ZoneId> zones;
+
+
+    public MainLayout(@Autowired Set<Locale> locales,
+                      @Autowired List<ZoneId> zones) {
+
+        this.locales = locales;
+        this.zones = zones;
+
         setPrimarySection(Section.DRAWER);
-        addToNavbar(true, createHeaderContent());
+        addToNavbar(createHeaderContent());
         addToDrawer(createDrawerContent());
     }
 
@@ -122,9 +144,16 @@ public class MainLayout extends AppLayout
 
         Image image = new Image("/images/user.svg","profile_image");
 
-        ContextMenu userMenu = new ContextMenu();
+        ContextMenu userMenu = createProfileMenu();
         userMenu.setTarget(image);
         userMenu.setOpenOnClick(true);
+
+        return image;
+    }
+
+    private ContextMenu createProfileMenu(){
+
+        ContextMenu userMenu = new ContextMenu();
 
         if(VaadinSecurity.check().isAnonymous())
         {
@@ -132,7 +161,7 @@ public class MainLayout extends AppLayout
             button.addClickListener( buttonClickEvent ->
                     buttonClickEvent.getSource().getUI().ifPresent(ui -> ui.getPage().setLocation("/sso/login")));
 
-            userMenu.addItem(button);
+            userMenu.add(button);
         }
 
         if(VaadinSecurity.check().isFullyAuthenticated())
@@ -141,15 +170,56 @@ public class MainLayout extends AppLayout
             UIUtils.setFontWeight(FontWeight.BOLD, label);
             UIUtils.setTextAlign(TextAlign.CENTER, label);
 
+            var button = UIUtils.createButton("Manage Account", VaadinIcon.COG_O, ButtonVariant.LUMO_TERTIARY);
+            button.addClickListener( buttonClickEvent ->
+                    buttonClickEvent.getSource().getUI().ifPresent(ui -> ui.getPage().setLocation(keycloakBaseURL + "/realms/hermes/account")));
+
+            userMenu.add(label,button);
+        }
+
+        var locale = new Select<Locale>();
+        locale.setLabel("Locale");
+        locale.setItems(locales);
+
+        locale.setValue(VaadinSession.getCurrent().getLocale());
+        locale.addValueChangeListener(listener -> {
+            VaadinSession.getCurrent().setLocale(listener.getValue());
+            UI.getCurrent().getPage().reload();
+        });
+        locale.setItemLabelGenerator(Locale::getDisplayCountry);
+        userMenu.add(new Hr(),locale);
+
+        var zone = new Select<ZoneId>();
+        zone.setLabel("Time Zone");
+        zone.setItems(zones);
+        zone.setValue(VaadinSession.getCurrent().getAttribute(ZoneId.class));
+        zone.addValueChangeListener(listener -> {
+            VaadinSession.getCurrent().setAttribute(ZoneId.class, listener.getValue());
+            UI.getCurrent().getPage().reload();
+        });
+        zone.setItemLabelGenerator(id ->
+                String.format(
+                        "%s%s","GMT",
+                        DateTimeUtils.getOffsetString(LocalDateTime.now(), id))
+        );
+
+        userMenu.add(zone,new Hr());
+
+        if(VaadinSecurity.check().isFullyAuthenticated()){
             var button = UIUtils.createButton("Logout", VaadinIcon.LOCK, ButtonVariant.LUMO_TERTIARY);
             button.addClickListener( buttonClickEvent ->
                     buttonClickEvent.getSource().getUI().ifPresent(ui -> ui.getPage().setLocation("/sso/logout")));
 
-            userMenu.add(label);
-            userMenu.addItem(button);
+            userMenu.add(button);
         }
 
-        return image;
+        return userMenu;
     }
 
+    @Override
+    public void configurePage(InitialPageSettings settings) {
+        HashMap<String, String> attributes = new HashMap<>();
+        attributes.put("rel", "shortcut icon");
+        settings.addLink("icons/icon.png", attributes);
+    }
 }
