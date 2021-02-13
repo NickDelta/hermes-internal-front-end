@@ -1,6 +1,7 @@
 package org.hua.hermes.keycloak.client.resources;
 
 import org.keycloak.admin.client.resource.GroupResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import javax.ws.rs.GET;
@@ -15,6 +16,9 @@ public interface CitizensResource
 {
     @Path("/manage")
     GroupResource manage();
+
+    @Path("/{id")
+    UserResource citizen(@QueryParam("id") String id);
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
