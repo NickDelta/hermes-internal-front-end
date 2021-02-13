@@ -5,7 +5,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:latest', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end:$SHORT_SHA', '.']
+    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:$SHORT_SHA', '.']
 images:
   - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:latest'
-  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end:$SHORT_SHA'
+  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:$SHORT_SHA'
