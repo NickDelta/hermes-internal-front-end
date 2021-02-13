@@ -1,9 +1,7 @@
 package org.hua.hermes.frontend.view;
 
 import com.vaadin.componentfactory.enhancedcrud.*;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -31,71 +29,61 @@ import java.util.Objects;
 @PageTitle(RouteConstants.TITLE_ORGS_ADMIN)
 @SecuredAccess(SecurityConstants.HAS_ORGS_ADMIN_ROLE)
 public class OrganizationsView
-        extends Crud<GroupRepresentation>
+        extends AbstractCrudView<GroupRepresentation>
         implements HasNotifications, HasUrlParameter<String> {
 
-    private final OrganizationCrudPresenter presenter;
+    private final OrganizationCrudPresenter organizationsPresenter;
 
     public OrganizationsView(@Autowired OrganizationRepository organizationRepository)
     {
-        super(GroupRepresentation.class, new Grid<>(),createOrganizationEditor());
+        super(GroupRepresentation.class, OrganizationEntityConstants.ENTITY_NAME, createOrganizationEditor());
 
         //Initialize CRUD Presenter
-        this.presenter = new OrganizationCrudPresenter(organizationRepository,this);
+        this.organizationsPresenter = new OrganizationCrudPresenter(organizationRepository,this);
+    }
 
-        //Allows selecting up to 1 items from grid
-        this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
-
+    @Override
+    public void setupDataProvider()
+    {
         //Initialize data provider(pagination)
         this.getGrid().setDataProvider(DataProvider.fromCallbacks(
-                fetch -> presenter.findAll(fetch.getOffset(),fetch.getLimit()).stream(),
-                count -> presenter.count()));
-
-        //Puts editor aside
-        this.setEditorPosition(CrudEditorPosition.ASIDE);
-
-        //Functional requirements don't have a user delete option so far
-        this.getDelete().setEnabled(false);
-        this.getDelete().getStyle().set("visibility","hidden");
-
-        //Setup the CRUD's Grid
-        setupGrid(getGrid());
-
-        //Setup internationalization (Only English for us)
-        setI18n(setupI18n());
-
-        //Setup events
-        setupEventListeners();
-
-        //Set CRUD to FullSize
-        setSizeFull();
-
+                fetch -> organizationsPresenter.findAll(fetch.getOffset(),fetch.getLimit()).stream(),
+                count -> organizationsPresenter.count()));
     }
 
-    public CrudI18n setupI18n()
+    @Override
+    public void setupGrid()
     {
-        CrudI18n crudI18n = CrudI18n.createDefault();
-        crudI18n.setNewItem("New " + OrganizationEntityConstants.ENTITY_NAME);
-        crudI18n.setEditItem("Edit " + OrganizationEntityConstants.ENTITY_NAME);
-        crudI18n.setEditLabel("Edit " + OrganizationEntityConstants.ENTITY_NAME);
-        crudI18n.getConfirm().getCancel().setContent(MessageConstants.DISCARD_MESSAGE);
-        crudI18n.getConfirm().getDelete().setContent(String.format(MessageConstants.DELETE_MESSAGE, OrganizationEntityConstants.ENTITY_NAME));
-        crudI18n.setDeleteItem("Delete");
-        return crudI18n;
+        getGrid().addColumn(GroupRepresentation::getId).setHeader(OrganizationEntityConstants.ID);
+        getGrid().addColumn(GroupRepresentation::getName).setHeader(OrganizationEntityConstants.NAME);
+        getGrid().getColumns().forEach(column -> column.setResizable(true).setAutoWidth(true));
+
+        GridContextMenu<GroupRepresentation> contextMenu = new GridContextMenu<>(getGrid());
+        //Do not show the context menu when a row is not clicked
+        contextMenu.setDynamicContentHandler(Objects::nonNull);
+
+        contextMenu.addItem("Manage Supervisors",listener ->
+                listener.getItem().ifPresent(action ->
+                        getUI().ifPresent(ui ->
+                                ui.navigate(RouteConstants.PAGE_ORG_SUPERVISORS + "/" + action.getName()))))
+                .setCheckable(false);
+
+        addEditColumn(getGrid());
     }
 
+    @Override
     public void setupEventListeners()
     {
         this.addSaveListener(e -> {
             var organization = e.getItem();
             if (organization.getId() != null) {
-                if (!presenter.update(organization)) {
+                if (!organizationsPresenter.update(organization)) {
                     //If save fails then don't close the editor
                     //Presenter return false on fail
                     this.cancelSave();
                 }
             } else {
-                if (!presenter.save(organization)){
+                if (!organizationsPresenter.save(organization)){
                     //If update fails then don't close the editor
                     //Presenter return false on fail
                     this.cancelSave();
@@ -113,26 +101,6 @@ public class OrganizationsView
 
     }
 
-    protected void setupGrid(Grid<GroupRepresentation> grid)
-    {
-        grid.addColumn(GroupRepresentation::getId).setHeader(OrganizationEntityConstants.ID);
-        grid.addColumn(GroupRepresentation::getName).setHeader(OrganizationEntityConstants.NAME);
-        grid.getColumns().forEach(column -> column.setResizable(true).setAutoWidth(true));
-
-        GridContextMenu<GroupRepresentation> contextMenu = new GridContextMenu<>(grid);
-        //Do not show the context menu when a row is not clicked
-        contextMenu.setDynamicContentHandler(Objects::nonNull);
-
-        contextMenu.addItem("Manage Supervisors",listener ->
-                listener.getItem().ifPresent(action ->
-                    getUI().ifPresent(ui ->
-                        ui.navigate(RouteConstants.PAGE_ORG_SUPERVISORS + "/" + action.getName()))))
-                .setCheckable(false);
-
-        addEditColumn(grid);
-    }
-
-
     private static CrudEditor<GroupRepresentation> createOrganizationEditor(){
 
         TrimmedTextField name = new TrimmedTextField(OrganizationEntityConstants.NAME);
@@ -147,8 +115,8 @@ public class OrganizationsView
         return new BinderCrudEditor<>(binder, layout);
     }
 
-    protected void navigateToOrganization(String orgName) {
-        getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(PAGE_ORGS_ADMIN,orgName)));
+    private void navigateToOrganization(String id) {
+        getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(PAGE_ORGS_ADMIN,id)));
     }
 
     @Override
@@ -160,7 +128,7 @@ public class OrganizationsView
                 return;
             }
             try {
-                organization = presenter
+                organization = organizationsPresenter
                         .findById(orgName)
                         .orElseThrow(NotFoundException::new);
                 edit(organization, EditMode.EXISTING_ITEM);

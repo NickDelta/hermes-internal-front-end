@@ -34,6 +34,7 @@ public class UserEntityConstants
     public static final String ACCOUNT_STATUS_LABEL = "Account Status";
 
     public static final String DATE_FORMAT = "dd/MM/yyyy";
+    //Format in which birthdate is stored in Keycloak
     public static final DateTimeFormatter BIRTHDATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     public static final String BIRTHDATE = "birthdate";

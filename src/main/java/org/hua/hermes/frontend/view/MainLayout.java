@@ -145,9 +145,16 @@ public class MainLayout extends AppLayout implements PageConfigurator
 
         Image image = new Image("/images/user.svg","profile_image");
 
-        ContextMenu userMenu = new ContextMenu();
+        ContextMenu userMenu = createProfileMenu();
         userMenu.setTarget(image);
         userMenu.setOpenOnClick(true);
+
+        return image;
+    }
+
+    private ContextMenu createProfileMenu(){
+
+        ContextMenu userMenu = new ContextMenu();
 
         if(VaadinSecurity.check().isAnonymous())
         {
@@ -193,8 +200,8 @@ public class MainLayout extends AppLayout implements PageConfigurator
         });
         zone.setItemLabelGenerator(id ->
                 String.format(
-                "%s%s","GMT",
-                DateTimeUtils.getOffsetString(LocalDateTime.now(), id))
+                        "%s%s","GMT",
+                        DateTimeUtils.getOffsetString(LocalDateTime.now(), id))
         );
 
         userMenu.add(zone,new Hr());
@@ -207,7 +214,7 @@ public class MainLayout extends AppLayout implements PageConfigurator
             userMenu.add(button);
         }
 
-        return image;
+        return userMenu;
     }
 
     @Override

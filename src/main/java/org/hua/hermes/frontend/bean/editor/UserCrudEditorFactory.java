@@ -15,6 +15,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.RegexpValidator;
+import com.vaadin.flow.server.VaadinSession;
 import org.hua.hermes.frontend.component.TrimmedTextField;
 import org.hua.hermes.frontend.constant.entity.UserEntityConstants;
 import org.hua.hermes.frontend.constant.MessageConstants;
@@ -61,11 +62,11 @@ public class UserCrudEditorFactory
 
         EnhancedDatePicker birthdateDatePicker = new EnhancedDatePicker();
 
-        DateFormat f = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
+        DateFormat f = DateFormat.getDateInstance(DateFormat.SHORT, VaadinSession.getCurrent().getLocale());
         String pattern = ((SimpleDateFormat)f).toPattern();
         birthdateDatePicker.setPattern(pattern);
 
-        birthdateDatePicker.setLabel(UserEntityConstants.BIRTHDATE_LABEL);
+        birthdateDatePicker.setLabel(UserEntityConstants.BIRTHDATE_LABEL + " (" + pattern + ")");
         birthdateDatePicker.setClearButtonVisible(true);
         birthdateDatePicker.getElement().setAttribute("colspan", "2");
 
@@ -158,11 +159,11 @@ public class UserCrudEditorFactory
                             KeycloakBindUtils.setAttribute(
                                     user,
                                     UserEntityConstants.BIRTHDATE,
-                                    UserEntityConstants.BIRTHDATE_FORMATTER.format(value))
+                                    UserEntityConstants.BIRTHDATE_FORMATTER.format(value)
+                            )
                         );
 
-        binder.forField(enabled)
-                .bind(UserRepresentation::isEnabled, UserRepresentation::setEnabled);
+        binder.forField(enabled).bind(UserRepresentation::isEnabled, UserRepresentation::setEnabled);
         //endregion
 
         //region Location binds
@@ -202,8 +203,7 @@ public class UserCrudEditorFactory
         //region Password binds + Status listener for alert
         binder.forField(password)
                 .asRequired(Validator.from(p -> {
-                    if (editor.getItem() == null) return true;
-                    if (editor.getItem().getId() != null) return true;
+                    if (editor.getItem() == null || editor.getItem().getId() != null) return true;
                     return !p.isEmpty();
                 }, MessageConstants.REQUIRED))
                 .withValidator(pass -> pass.matches("^(|(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,})$"),
@@ -216,8 +216,7 @@ public class UserCrudEditorFactory
 
         binder.forField(confirmPassword)
                 .asRequired(Validator.from(p -> {
-                    if (editor.getItem() == null) return true;
-                    if (editor.getItem().getId() != null) return true;
+                    if (editor.getItem() == null || editor.getItem().getId() != null) return true;
                     return !p.isEmpty();
                 }, MessageConstants.REQUIRED))
                 .withValidator(pass -> pass.equals(password.getValue()),
