@@ -20,8 +20,6 @@ public class OrganizationCrudPresenter
     private final OrganizationRepository repository;
     private final HasNotifications view;
 
-    //In case we want to continue execution, returning default values is necessary to prevent Vaadin from crashing
-
     public List<GroupRepresentation> findAll(int offset, int limit) {
         try {
             return execute(() -> repository.findAll(offset, limit));

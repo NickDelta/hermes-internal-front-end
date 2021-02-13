@@ -2,7 +2,6 @@ package org.hua.hermes.frontend.view;
 
 import com.vaadin.componentfactory.enhancedcrud.*;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -14,10 +13,8 @@ import de.codecamp.vaadin.security.spring.access.SecuredAccess;
 import org.hua.hermes.backend.entity.Application;
 import org.hua.hermes.backend.entity.ApplicationState;
 import org.hua.hermes.frontend.component.StatusBadge;
-import org.hua.hermes.frontend.constant.MessageConstants;
 import org.hua.hermes.frontend.constant.RouteConstants;
 import org.hua.hermes.frontend.constant.SecurityConstants;
-import org.hua.hermes.frontend.constant.entity.OrganizationEntityConstants;
 import org.hua.hermes.frontend.repository.ApplicationRepository;
 import org.hua.hermes.frontend.util.DateTimeUtils;
 import org.hua.hermes.frontend.util.NavigationUtil;
@@ -36,51 +33,35 @@ import static org.hua.hermes.frontend.constant.RouteConstants.PAGE_ORG_APPLICATI
 @PageTitle(RouteConstants.TITLE_APPLICATIONS)
 @SecuredAccess(SecurityConstants.HAS_ORG_EMPLOYEE_ROLE)
 public class ApplicationsView
-        extends Crud<Application>
+        extends AbstractCrudView<Application>
         implements HasNotifications, HasUrlParameter<String> {
 
     private final ApplicationCrudPresenter presenter;
 
     public ApplicationsView(@Autowired ApplicationRepository repository){
 
-        super(Application.class, new Grid<>(),createEmployeesEditor());
+        super(Application.class, Application.ENTITY_NAME, createEmployeesEditor());
 
-        presenter = new ApplicationCrudPresenter(repository,this);
+        this.presenter = new ApplicationCrudPresenter(repository,this);
 
+        //Overlay CRUD Editor is more beautiful here
         this.setEditorPosition(CrudEditorPosition.OVERLAY);
-        this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
-
-        this.getGrid().setDataProvider(DataProvider.fromCallbacks(
-                fetch -> presenter.findAll(fetch.getOffset(),fetch.getLimit()).stream(),
-                count -> presenter.count()));
 
         //Employees cannot create new applications
         //Remove New button by setting an empty toolbar
         this.setToolbar();
 
-        //Functional requirements don't have a application delete option so far
-        this.getDelete().setEnabled(false);
-        this.getDelete().getStyle().set("visibility","hidden");
-
-        setupGrid(getGrid());
-        setI18n(setupI18n());
-        setupEventListeners();
-        setSizeFull();
-
     }
 
-    public CrudI18n setupI18n()
+    @Override
+    public void setupDataProvider()
     {
-        CrudI18n crudI18n = CrudI18n.createDefault();
-        crudI18n.setNewItem("New " + Application.ENTITY_NAME);
-        crudI18n.setEditItem("Edit " + Application.ENTITY_NAME);
-        crudI18n.setEditLabel("Edit" + Application.ENTITY_NAME);
-        crudI18n.getConfirm().getCancel().setContent(MessageConstants.DISCARD_MESSAGE);
-        crudI18n.getConfirm().getDelete().setContent(String.format(MessageConstants.DELETE_MESSAGE, OrganizationEntityConstants.ENTITY_NAME));
-        crudI18n.setDeleteItem("Delete");
-        return crudI18n;
+        this.getGrid().setDataProvider(DataProvider.fromCallbacks(
+                fetch -> presenter.findAll(fetch.getOffset(),fetch.getLimit()).stream(),
+                count -> presenter.count()));
     }
 
+    @Override
     public void setupEventListeners() {
 
         //Handling only update
@@ -103,15 +84,16 @@ public class ApplicationsView
         getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(PAGE_ORG_APPLICATIONS, id)));
     }
 
-    protected void setupGrid(Grid<Application> grid)
+    @Override
+    public void setupGrid()
     {
-        grid.addColumn(Application::getId).setHeader(Application.ID_LABEL);
-        grid.addColumn(Application::getCreatedBy).setHeader(Application.CREATED_BY_LABEL);
-        grid.addColumn((application) -> DateTimeUtils.formatDateTime(application.getCreatedDate())).setHeader(Application.CREATED_DATE_LABEL);
-        grid.addColumn(Application::getLastModifiedBy).setHeader(Application.LAST_MODIFIED_BY_LABEL);
-        grid.addColumn((application) -> DateTimeUtils.formatDateTime(application.getLastModifiedDate())).setHeader(Application.LAST_MODIFIED_ON_LABEL);
+        getGrid().addColumn(Application::getId).setHeader(Application.ID_LABEL);
+        getGrid().addColumn(Application::getCreatedBy).setHeader(Application.CREATED_BY_LABEL);
+        getGrid().addColumn((application) -> DateTimeUtils.formatDateTime(application.getCreatedDate())).setHeader(Application.CREATED_DATE_LABEL);
+        getGrid().addColumn(Application::getLastModifiedBy).setHeader(Application.LAST_MODIFIED_BY_LABEL);
+        getGrid().addColumn((application) -> DateTimeUtils.formatDateTime(application.getLastModifiedDate())).setHeader(Application.LAST_MODIFIED_ON_LABEL);
 
-        grid.addComponentColumn(application -> {
+        getGrid().addComponentColumn(application -> {
             BadgeColor color;
             String status;
             switch (application.getState()){
@@ -136,18 +118,18 @@ public class ApplicationsView
             return badge;
         }).setHeader(Application.STATE_LABEL);
 
-        grid.addColumn((application) -> DateTimeUtils.formatDateTime(application.getAppointmentDate())).setHeader(Application.APPOINTMENT_DATE_LABEL);
+        getGrid().addColumn((application) -> DateTimeUtils.formatDateTime(application.getAppointmentDate())).setHeader(Application.APPOINTMENT_DATE_LABEL);
 
-        grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> {
+        getGrid().setItemDetailsRenderer(new ComponentRenderer<>(item -> {
             var label = new Label("Details:");
             var text = new Label(item.getDetails());
             text.getStyle().set("font-weight", "bold");
             return new HorizontalLayout(label,text);
         }));
 
-        grid.getColumns().forEach(column -> column.setResizable(true).setAutoWidth(true));
+        getGrid().getColumns().forEach(column -> column.setResizable(true).setAutoWidth(true));
 
-        addEditColumn(grid);
+        addEditColumn(getGrid());
     }
 
     private static CrudEditor<Application> createEmployeesEditor() {
@@ -167,7 +149,6 @@ public class ApplicationsView
 
         return new BinderCrudEditor<>(binder, layout);
     }
-
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String id)

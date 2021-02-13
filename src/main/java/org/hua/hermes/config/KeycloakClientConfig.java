@@ -19,10 +19,10 @@ public class KeycloakClientConfig
     @Value("${keycloak.realm}")
     private String realm;
 
-    @Value("#{environment.KEYCLOAK_ADMIN_CLIENT_ID}")
+    @Value("${keycloak.admin.clientId}")
     private String clientId;
 
-    @Value("#{environment.KEYCLOAK_ADMIN_SECRET}")
+    @Value("${keycloak.admin.clientSecret}")
     private String clientSecret;
 
     @Bean

@@ -4,44 +4,27 @@ import com.vaadin.componentfactory.enhancedcrud.*;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinSession;
 import de.codecamp.vaadin.security.spring.access.SecuredAccess;
-
-import org.hua.hermes.frontend.component.StatusBadge;
 import org.hua.hermes.frontend.constant.RouteConstants;
 import org.hua.hermes.frontend.constant.SecurityConstants;
 import org.hua.hermes.frontend.constant.entity.UserEntityConstants;
 import org.hua.hermes.frontend.repository.OrganizationRepository;
 import org.hua.hermes.frontend.repository.SupervisorRepository;
-import org.hua.hermes.frontend.util.DateTimeUtils;
 import org.hua.hermes.frontend.util.NavigationUtil;
 import org.hua.hermes.frontend.util.UIUtils;
-import org.hua.hermes.frontend.util.style.css.lumo.BadgeColor;
-import org.hua.hermes.frontend.util.style.css.lumo.BadgeShape;
-import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
 import org.hua.hermes.frontend.view.presenter.OrganizationUserCrudPresenter;
 import org.hua.hermes.frontend.view.presenter.OrganizationCrudPresenter;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.FormatStyle;
-
-import static org.hua.hermes.frontend.constant.MessageConstants.DELETE_MESSAGE;
-import static org.hua.hermes.frontend.constant.MessageConstants.DISCARD_MESSAGE;
-
 @Route(value = RouteConstants.PAGE_ORG_SUPERVISORS, layout = MainLayout.class)
 @SecuredAccess(SecurityConstants.HAS_ORGS_ADMIN_ROLE)
 public class SupervisorsView
-        extends Crud<UserRepresentation>
+        extends AbstractUsersView
         implements HasNotifications, HasUrlParameter<String>, HasDynamicTitle {
 
     private final OrganizationCrudPresenter orgPresenter;
@@ -53,19 +36,10 @@ public class SupervisorsView
                            @Autowired SupervisorRepository supervisorsRepository,
                            @Autowired CrudEditor<UserRepresentation> userCrudEditor)
     {
-        super(UserRepresentation.class, new Grid<>(),userCrudEditor);
+        super(UserEntityConstants.SUPERVISOR_NAME,userCrudEditor);
 
         this.orgPresenter = new OrganizationCrudPresenter(orgRepository,this);
         this.userPresenter = new OrganizationUserCrudPresenter(supervisorsRepository,this);
-
-        this.getGrid().setSelectionMode(Grid.SelectionMode.SINGLE);
-
-        this.getGrid().setDataProvider(DataProvider.fromCallbacks(
-                fetch -> userPresenter.findAll(organization,fetch.getOffset(),fetch.getLimit()).stream(),
-                count -> userPresenter.count(organization)));
-
-        this.setEditorPosition(CrudEditorPosition.ASIDE);
-
 
         //Create custom toolbar - Needed to put a nice back button to navigate to the Organizations view
         Button backButton = UIUtils.createButton("Back", VaadinIcon.ARROW_LEFT, ButtonVariant.LUMO_PRIMARY);
@@ -79,32 +53,16 @@ public class SupervisorsView
         newItemButton.addClickListener(e -> this.edit(new UserRepresentation(), Crud.EditMode.NEW_ITEM));
 
         this.setToolbar(backButton, newItemButton);
-
-        //Functional requirements don't have a user delete option so far
-        this.getDelete().setEnabled(false);
-        this.getDelete().getStyle().set("visibility","hidden");
-
-        setupGrid(this.getGrid());
-        setI18n(setupI18n());
-        setupEventListeners();
-
-        addEditColumn(this.getGrid());
-        setSizeFull();
-
     }
 
-    public CrudI18n setupI18n()
-    {
-        CrudI18n crudI18n = CrudI18n.createDefault();
-        crudI18n.setNewItem("New " + UserEntityConstants.SUPERVISOR_NAME);
-        crudI18n.setEditItem("Edit " + UserEntityConstants.SUPERVISOR_NAME);
-        crudI18n.setEditLabel("Edit " + UserEntityConstants.SUPERVISOR_NAME);
-        crudI18n.getConfirm().getCancel().setContent(DISCARD_MESSAGE);
-        crudI18n.getConfirm().getDelete().setContent(String.format(DELETE_MESSAGE, UserEntityConstants.SUPERVISOR_NAME));
-        crudI18n.setDeleteItem("Delete");
-        return crudI18n;
+    @Override
+    public void setupDataProvider() {
+        this.getGrid().setDataProvider(DataProvider.fromCallbacks(
+                fetch -> userPresenter.findAll(organization,fetch.getOffset(),fetch.getLimit()).stream(),
+                count -> userPresenter.count(organization)));
     }
 
+    @Override
     public void setupEventListeners()
     {
         this.addSaveListener(e -> {
@@ -119,64 +77,15 @@ public class SupervisorsView
         });
 
         this.addEditListener(e -> {
-            navigateToEntity(e.getItem().getId());
+            navigateToUser(e.getItem().getId());
             this.getEditor().setItem(e.getItem());
         });
 
-        this.addCancelListener(e -> navigateToEntity(null));
+        this.addCancelListener(e -> navigateToUser(null));
 
     }
 
-    protected void setupGrid(Grid<UserRepresentation> grid)
-    {
-        grid.addColumn(UserRepresentation::getId).setHeader(UserEntityConstants.ID_LABEL);
-        grid.addColumn(UserRepresentation::getUsername).setHeader(UserEntityConstants.USERNAME_LABEL);
-        grid.addColumn(UserRepresentation::getFirstName).setHeader(UserEntityConstants.FIRST_NAME_LABEL);
-        grid.addColumn(UserRepresentation::getLastName).setHeader(UserEntityConstants.LAST_NAME_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.GENDER)).setHeader(UserEntityConstants.GENDER_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.PHONE)).setHeader(UserEntityConstants.PHONE_LABEL);
-        grid.addColumn(UserRepresentation::getEmail).setHeader(UserEntityConstants.EMAIL_LABEL);
-        grid.addColumn(user -> {
-            var date = UserEntityConstants.BIRTHDATE_FORMATTER
-                    .parse(user.firstAttribute(UserEntityConstants.BIRTHDATE));
-
-            return DateTimeUtils.formatDate(FormatStyle.SHORT,date);
-        }).setHeader(UserEntityConstants.BIRTHDATE_LABEL);
-
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.STREET_ADDRESS)).setHeader(UserEntityConstants.STREET_ADDRESS_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.POSTAL_CODE)).setHeader(UserEntityConstants.POSTAL_CODE_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.LOCALITY)).setHeader(UserEntityConstants.LOCALITY_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.REGION)).setHeader(UserEntityConstants.REGION_LABEL);
-        grid.addColumn(user -> user.firstAttribute(UserEntityConstants.COUNTRY)).setHeader(UserEntityConstants.COUNTRY_LABEL);
-
-        grid.addColumn(user -> {
-            LocalDateTime creationDate = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(user.getCreatedTimestamp()),
-                    VaadinSession.getCurrent().getAttribute(ZoneId.class)
-            );
-            return DateTimeUtils.formatDateTime(FormatStyle.SHORT,creationDate);
-        }).setHeader(UserEntityConstants.CREATED_ON_LABEL);
-
-        grid.addComponentColumn(user -> {
-            BadgeColor color;
-            String status;
-            if (user.isEnabled()) {
-                color = BadgeColor.SUCCESS_PRIMARY;
-                status = "Enabled";
-            } else {
-                color = BadgeColor.ERROR_PRIMARY;
-                status = "Disabled";
-            }
-            var badge = new StatusBadge(status, color, BadgeSize.M, BadgeShape.PILL);
-            badge.getElement().setProperty("title", status);
-            return badge;
-        }).setHeader(UserEntityConstants.ACCOUNT_STATUS_LABEL);
-
-        grid.getColumns().forEach(column -> column.setResizable(true).setAutoWidth(true));
-
-    }
-
-    protected void navigateToEntity(String id) {
+    private void navigateToUser(String id) {
         getUI().ifPresent(ui -> ui.navigate(NavigationUtil.generateLocation(RouteConstants.PAGE_ORG_SUPERVISORS, organization.getName(), id)));
     }
 

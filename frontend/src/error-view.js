@@ -2,6 +2,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
 class ErrorView extends PolymerElement {
 
+    //FIXME Template does not render correctly in all screen sizes.
     static get template() {
         return html`
 <style>
