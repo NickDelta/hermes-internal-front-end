@@ -24,26 +24,18 @@ public class CitizenRepositoryImpl implements CitizenRepository {
 
 
     @Override
-    public Optional<UserRepresentation> findById(String citizenId) {
-        return Optional.ofNullable(client
-        .realm(realm)
-        .users()
-        .get(citizenId)
-        .toRepresentation());
+    public Optional<UserRepresentation> findById(String id) {
+        return Optional.ofNullable(client.citizens().citizen(id).toRepresentation());
     }
 
     @Override
     public List<UserRepresentation> findAll(int offset, int limit) {
-        return client
-                .citizens()
-                .list(offset,limit);
+        return client.citizens().list(offset,limit);
     }
 
     @Override
     public Integer count() {
-        return client
-                .citizens()
-                .count();
+        return client.citizens().count();
     }
 
     @Override
@@ -65,22 +57,18 @@ public class CitizenRepositoryImpl implements CitizenRepository {
 
     @Override
     public boolean update(UserRepresentation userRepresentation) {
-        client
-                .realm(realm)
-                .users()
-                .get(userRepresentation.getId())
-                .update(userRepresentation);
+        client.citizens()
+              .citizen(userRepresentation.getId())
+              .update(userRepresentation);
 
         return true;
     }
 
     @Override
     public boolean delete(UserRepresentation userRepresentation) {
-        client
-                .citizens()
-                .manage()
-                .members()
-                .remove(userRepresentation);
+        client.citizens()
+                .citizen(userRepresentation.getId())
+                .remove();
 
         return true;
     }
