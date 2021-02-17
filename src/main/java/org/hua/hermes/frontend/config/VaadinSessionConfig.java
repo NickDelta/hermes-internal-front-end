@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class VaadinSessionConfig implements VaadinServiceInitListener {
@@ -20,6 +21,8 @@ public class VaadinSessionConfig implements VaadinServiceInitListener {
             @Override
             public void sessionInit(SessionInitEvent event) throws ServiceException
             {
+                event.getSession().setLocale(Locale.US);
+
                 var now = LocalDateTime.now();
                 //Get zone that has the same ZoneRule with the system's default ZoneId.
                 //Normally we should detect the zone based on the client's fingerprints
@@ -33,6 +36,5 @@ public class VaadinSessionConfig implements VaadinServiceInitListener {
                 event.getSession().setAttribute(ZoneId.class,zone);
             }
         });
-
     }
 }

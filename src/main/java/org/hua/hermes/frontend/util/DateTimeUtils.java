@@ -2,6 +2,7 @@ package org.hua.hermes.frontend.util;
 
 import com.vaadin.flow.server.VaadinSession;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,8 +31,10 @@ public class DateTimeUtils
     }
 
     public static String formatDateTime(Date date){
-        String format = "dd/MM/yyyy HH:mm:ss";
-        SimpleDateFormat formatter = new SimpleDateFormat(format,VaadinSession.getCurrent().getLocale());
+        DateFormat f = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, VaadinSession.getCurrent().getLocale());
+        String pattern = ((SimpleDateFormat)f).toPattern();
+
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern,VaadinSession.getCurrent().getLocale());
         formatter.setTimeZone(TimeZone.getTimeZone(VaadinSession.getCurrent().getAttribute(ZoneId.class)));
         return formatter.format(date);
     }

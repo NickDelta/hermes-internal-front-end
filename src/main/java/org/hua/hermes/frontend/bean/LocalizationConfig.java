@@ -32,10 +32,8 @@ public class LocalizationConfig
     @Bean
     public Set<Locale> getLocales(){
         var locales = new HashSet<Locale>();
-        locales.add(Locale.getDefault());
         locales.add(new Locale("el","GR"));
         locales.add(Locale.US);
-
         return locales;
     }
 

@@ -11,6 +11,7 @@ import org.hua.hermes.frontend.util.style.css.lumo.BadgeSize;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.FormatStyle;
@@ -33,7 +34,13 @@ public abstract class AbstractUsersView extends AbstractCrudView<UserRepresentat
         getGrid().addColumn(user -> user.firstAttribute(UserEntityConstants.GENDER)).setHeader(UserEntityConstants.GENDER_LABEL);
         getGrid().addColumn(user -> user.firstAttribute(UserEntityConstants.PHONE)).setHeader(UserEntityConstants.PHONE_LABEL);
         getGrid().addColumn(UserRepresentation::getEmail).setHeader(UserEntityConstants.EMAIL_LABEL);
-        getGrid().addColumn(user -> user.firstAttribute(UserEntityConstants.BIRTHDATE)).setHeader(UserEntityConstants.BIRTHDATE_LABEL);
+
+        getGrid().addColumn(user -> {
+            var date = LocalDate.parse(
+                    user.firstAttribute(UserEntityConstants.BIRTHDATE),
+                    UserEntityConstants.BIRTHDATE_FORMATTER); //Convert from Keycloak String format to LocalDate
+            return DateTimeUtils.formatDate(FormatStyle.SHORT,date); //Convert back to localized String
+        }).setHeader(UserEntityConstants.BIRTHDATE_LABEL);
 
         getGrid().addColumn(user -> user.firstAttribute(UserEntityConstants.STREET_ADDRESS)).setHeader(UserEntityConstants.STREET_ADDRESS_LABEL);
         getGrid().addColumn(user -> user.firstAttribute(UserEntityConstants.POSTAL_CODE)).setHeader(UserEntityConstants.POSTAL_CODE_LABEL);
@@ -46,7 +53,7 @@ public abstract class AbstractUsersView extends AbstractCrudView<UserRepresentat
                     Instant.ofEpochMilli(user.getCreatedTimestamp()),
                     VaadinSession.getCurrent().getAttribute(ZoneId.class)
             );
-            return DateTimeUtils.formatDate(FormatStyle.SHORT,creationDate);
+            return DateTimeUtils.formatDateTime(FormatStyle.SHORT,creationDate);
         }).setHeader(UserEntityConstants.CREATED_ON_LABEL);
 
         getGrid().addComponentColumn(user -> {

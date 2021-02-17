@@ -129,6 +129,7 @@
 				<vaadin.productionMode>true</vaadin.productionMode>
 			</properties>
 			<build>
+				<finalName>hermes-internal-front-end</finalName>
 				<plugins>
 					<plugin>
 						<groupId>com.vaadin</groupId>
