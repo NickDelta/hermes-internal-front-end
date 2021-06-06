@@ -1,11 +1,12 @@
 steps:
   - name: maven:3.6.3-jdk-11-slim #use docker image because mvn cloud builder doesn't support jdk11
     entrypoint: 'mvn'
-    args: ['vaadin:prepare-frontend', 'package', '-Pproduction', '-DskipTests','-Dhttp.keepAlive=false'] #-Dhttp.keepAlive=false fixes a bug that causes cloud build to fail downloading deps
+    #-Dhttp.keepAlive=false fixes a bug that causes cloud build to fail downloading deps
+    args: ['vaadin:prepare-frontend', 'package', '-Pproduction', '-DskipTests','-Dhttp.keepAlive=false']
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:latest', '.']
+    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/prod:latest', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:$SHORT_SHA', '.']
+    args: [ 'build', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/prod:$SHORT_SHA', '.']
 images:
-  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:latest'
-  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/internal-prod:$SHORT_SHA'
+  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/prod:latest'
+  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/internal-front-end/prod:$SHORT_SHA'

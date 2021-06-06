@@ -5,19 +5,19 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.8.RELEASE</version>
+		<version>2.4.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.hua.hermes</groupId>
 	<artifactId>hermes-internal-front-end</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>Hermes Internal Front End</name>
 	<description>Hermes Internal Front-End</description>
 
 	<properties>
 		<java.version>11</java.version>
-		<vaadin.version>14.4.7</vaadin.version>
-		<keycloak.version>12.0.2</keycloak.version>
+		<vaadin.version>14.4.10</vaadin.version>
+		<keycloak.version>13.0.0</keycloak.version>
 	</properties>
 
 	<dependencyManagement>
@@ -112,7 +112,7 @@
 		<dependency>
 			<groupId>com.vaadin.componentfactory</groupId>
 			<artifactId>enhanced-date-picker</artifactId>
-			<version>1.4.0</version>
+			<version>1.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-validator</groupId>

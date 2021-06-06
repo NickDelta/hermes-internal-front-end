@@ -1,6 +1,6 @@
-FROM adoptopenjdk/openjdk11:alpine
+FROM openjdk:11-jre-slim
 COPY target/hermes-internal-front-end.jar app.jar
-RUN addgroup -S hermesgroup && adduser -S hermes -G hermesgroup
+RUN groupadd hermes && useradd -g users -G hermes hermes
 USER hermes
 EXPOSE 8082
 CMD java -jar app.jar
