@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: internal-frontend
+  name: internal-frontend
+  namespace: hermes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: internal-frontend
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: internal-frontend
+    spec:
+      containers:
+        - env:
+            - name: HERMES_BACKEND_URL
+              # URI is http://<service-name>.<namespace>.svc.cluster.local:<service-port>
+              value: http://backend.hermes.svc.cluster.local:8080
+            - name: KEYCLOAK_ADMIN_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: internal-frontend-env-secret
+                  key: KEYCLOAK_ADMIN_CLIENTID
+            - name: KEYCLOAK_ADMIN_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: internal-frontend-env-secret
+                  key: KEYCLOAK_ADMIN_CLIENTSECRET
+            - name: KEYCLOAK_AUTH_SERVER_URL
+              value: https://sso.hermesapp.xyz/auth
+            - name: KEYCLOAK_CREDENTIALS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: internal-frontend-env-secret
+                  key: KEYCLOAK_CREDENTIALS_SECRET
+          image: europe-west2-docker.pkg.dev/hua-hermes/internal-front-end/prod
+          name: hermes-internal-frontend
+          ports:
+            - containerPort: 8082
+            - containerPort: 9001
+          resources: {}
+      restartPolicy: Always

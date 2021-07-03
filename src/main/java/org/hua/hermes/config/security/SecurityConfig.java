@@ -63,7 +63,8 @@ class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         new VaadinSecurityConfigurer(vaadinSecurityProperties).configure(http);
         http.requestMatchers().antMatchers("/sso/login", "/sso/logout");
         http.logout().logoutUrl("/sso/logout");
-        http.authorizeRequests();
+        http.authorizeRequests()
+                .mvcMatchers("/actuator/health").permitAll();
     }
 
     @Bean
