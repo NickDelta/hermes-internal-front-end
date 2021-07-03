@@ -7,6 +7,16 @@ spring:
     property-naming-strategy: com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy
 server:
   port: 8082
-logging:
-    level:
-      root: info
+  error:
+    include-stacktrace: never #Prevent sensitive info exposure
+    include-message: never #Prevent sensitive info exposure
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: 'health'
+  server:
+    port: 9001

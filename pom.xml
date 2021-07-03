@@ -17,7 +17,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<vaadin.version>14.4.10</vaadin.version>
-		<keycloak.version>13.0.0</keycloak.version>
+		<keycloak.version>14.0.0</keycloak.version>
 	</properties>
 
 	<dependencyManagement>
@@ -64,6 +64,10 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -149,7 +153,6 @@
 			</build>
 		</profile>
 	</profiles>
-
 
 	<build>
 		<plugins>
